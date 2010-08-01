@@ -1,78 +1,63 @@
-JSpec.describe('darwin.lang', function() {
+JSpec.describe('darwin.Language', function() {
     before_each(function() {
         evolu._languages = {}
     })
     
     it('should create new language', function() {
-        var created  = evolu.lang('LNG', function() { this.a = 1 })
-        var loaded   = evolu.lang('LNG')
-        var another  = evolu.lang('ANZR')
-        
-        expect(loaded).to(be, created)
-        expect(loaded).not_to(be, another)
-        
-        expect(loaded).to(be_an_instance_of, evolu.Language)
-        expect(loaded.name).to(be, 'LNG')
-        expect(loaded.a).to(be, 1)
-        
-        expect(another).to(be_an_instance_of, evolu.Language)
-        expect(another.name).to(be, 'ANZR')
-    })
+        expect(evolu.lang('LNG')).to(be_undefined)
     
-    it('should call initializer only on new language', function() {
-        evolu.lang('LNG', function() { this.a = 1 })
-        evolu.lang('LNG', function() { this.b = 2 })
-        
-        var lang = evolu.lang('LNG')
+        var lang = evolu.lang('LNG', function() { this.a = 1 })
+
+        expect(evolu.lang('LNG')).to(be, lang)
+        expect(lang).to(be_an_instance_of, evolu.Language)
+        expect(lang.name).to(be, 'LNG')
         expect(lang.a).to(be, 1)
-        expect(lang.b).to(be_undefined)
     })
     
     it('should ignore case in language name', function() {
-        var upper = evolu.lang('LNG', function() { this.a = 1 })
-        var lower = evolu.lang('lng', function() { this.b = 2 })
+        evolu.lang('LNG', function() { this.a = 1 })
+        expect(evolu.lang('lng')).to(be, evolu.lang('LNG'))
+    })
+    
+    it('should recreate language', function() {
+        evolu.lang('LNG', function() { this.a = 1 })
+        evolu.lang('lng', function() { this.b = 2 })
         
-        expect(upper).to(be, lower)
-        expect(upper.a).to(be, 1)
-        expect(lower.b).to(be_undefined)
+        expect(evolu.lang('LNG')).not_to(have_property, 'a')
+        expect(evolu.lang('LNG')).to(have_property, 'b', 2)
     })
     
     it('should add commands', function() {
-        var lang = evolu.lang('LNG')
-        var run = function() { }
+        var func = function() { }
+        var lang = evolu.lang('LNG', function() {
+            this.command('one',   func).
+                 command('three', { c: 3 }).
+                 command('two',   { b: 2, position: 1 })
+        })
         
-        var returned = lang.command('one', run)
-        expect(returned).to(be, lang)
-        expect(lang._commands).to(eql, [{ name: 'one', run: run }])
-        
-        lang.command('three', { c: 3 })
-        lang.command('two',   { b: 2, position: 1 })
-        expect(lang._commands).to(eql, [{ name: 'one',   run: run },
+        expect(lang._commands).to(eql, [{ name: 'one',   run: func },
                                         { name: 'two',   b: 2 },
                                         { name: 'three', c: 3 }])
     })
     
     it('should add condition', function() {
-        var lang = evolu.lang('LNG')
-        var run = function() { }
-        var init = lang._initCondition
+        var func = function() { }
+        var lang = evolu.lang('LNG', function() {
+            this.condition('b', { b: 2 }).
+                 condition('a', { a: 1, position: 0 })
+        })
         
-        var returned = lang.condition('one', run)
-        lang.condition('three', { c: 3 })
-        lang.condition('two',   { b: 2, position: 1 })
-        
-        expect(returned).to(be, lang)
         expect(lang._commands).to(eql, [
-            { name: 'if_one',   run: run, init: init, condition: true },
-            { name: 'if_two',   b: 2,     init: init, condition: true },
-            { name: 'if_three', c: 3,     init: init, condition: true }
+            { name: 'if_a', a: 1, init: lang._initCondition, condition: true },
+            { name: 'if_b', b: 2, init: lang._initCondition, condition: true }
         ])
     })
     
     it('should set own init for condition', function() {
-        var lang = evolu.lang('LNG')
-        lang._initCondition = function(i) { this.push(i + '_global') }
-        lang.condition('one', { init: function(i) { this.push(i) } })
+        var lang = evolu.lang('LNG', function() {
+            this._initCondition = function(i) { this.push(i + '_global') }
+            this.condition('one', function(i) { this.push(i) })
+        })
         
         var out = []
         lang._commands[0].init.call(out, 'a')
