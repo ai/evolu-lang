@@ -36,4 +36,18 @@ JSpec.describe('darwin.lang', function() {
         expect(upper.a).to(be, 1)
         expect(lower.b).to(be_undefined)
     })
+    
+    it('should add commands', function() {
+        var lang = evolu.lang('LNG')
+        
+        var returned = lang.command('one', { a: 1 })
+        expect(returned).to(be, lang)
+        expect(lang._commands).to(eql, [{ name: 'one', a: 1 }])
+        
+        lang.command('three', { c: 3 })
+        lang.command('two',   { b: 2, position: 1 })
+        expect(lang._commands).to(eql, [{ name: 'one',   a: 1 },
+                                        { name: 'two',   b: 2 },
+                                        { name: 'three', c: 3 }])
+    })
 })
