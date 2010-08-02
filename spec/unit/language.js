@@ -63,4 +63,21 @@ JSpec.describe('darwin.Language', function() {
         lang._commands[0].init.call(out, 'a')
         expect(out).to(eql, ['a_global', 'a'])
     })
+    
+    it('should find language for compile', function() {
+        expect(function() {
+            evolu.compile('NO PROGRAM')
+        }).to(throw_error, /isn't Evolu program/)
+        
+        expect(function() {
+            evolu.compile('EVOLU:LNG:abc')
+        }).to(throw_error, 'Unknown Evolu language `LNG`')
+        
+        var lang = evolu.lang('LNG', function() { })
+        expect(lang).to(receive, 'compile', 'once').with_args([97, 98, 99])
+        var result = evolu.compile('EVOLU:LNG:abc')
+        
+        expect(result).to(be_an_instance_of, evolu.Code)
+        expect(result).to(have_property, 'language', lang)
+    })
 })
