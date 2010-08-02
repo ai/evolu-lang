@@ -44,8 +44,8 @@ JSpec.describe('darwin.Language', function() {
     it('should add condition', function() {
         var func = function() { }
         var lang = evolu.lang('LNG', function() {
-            this.condition('b', { b: 2 }).
-                 condition('a', { a: 1, position: 1 })
+            this.condition('if_b', { b: 2 }).
+                 condition('if_a', { a: 1, position: 1 })
         })
         
         expect(lang._commands).to(eql, [
@@ -53,17 +53,6 @@ JSpec.describe('darwin.Language', function() {
             { name: 'if_a', a: 1, init: lang._initCondition, condition: true },
             { name: 'if_b', b: 2, init: lang._initCondition, condition: true }
         ])
-    })
-    
-    it('should set own init for condition', function() {
-        var lang = evolu.lang('LNG', function() {
-            this._initCondition = function(i) { this.push(i + '_global') }
-            this.condition('one', function(i) { this.push(i) })
-        })
-        
-        var out = []
-        lang._commands[1].init.call(out, 'a')
-        expect(out).to(eql, ['a_global', 'a'])
     })
     
     it('should find language for compile', function() {
@@ -93,7 +82,10 @@ JSpec.describe('darwin.Language', function() {
         expect(code).to(be_an_instance_of, evolu.Code)
         expect(code).to(have_property, 'language', lang)
         
-        expect(code._rules).to(eql, [[ [b] ], [ [a, 'two'], [b, 256] ]])
+        expect(code._rules).to(eql, [
+            { commands: [[b]],                  required: 0 },
+            { commands: [[a, 'two'], [b, 256]], required: 0 }
+        ])
     })
     
     it('should call initializers on compiling', function() {
@@ -103,10 +95,41 @@ JSpec.describe('darwin.Language', function() {
         })
         var a = lang._commands[1], b = lang._commands[2]
         
-        var rule = [[a, 'one'], [b]]
-        expect(a).to(receive, 'init').with_args(rule, 'one')
-        expect(b).to(receive, 'init').with_args(rule)
+        var rule = { commands: [[a, 'one'], [b]], required: 0 }
+        expect(a).to(receive, 'init').with_args(rule, a, 'one')
+        expect(b).to(receive, 'init').with_args(rule, b)
         
         lang.compile([1, 128, 2])
+    })
+    
+    it('should init command', function() {
+        var lang = evolu.lang('LNG', function() {
+            this.command('a', { init: function(rule, command, param) {
+                expect(this).to(be_an_instance_of, evolu.Code)
+                expect(rule.commands.length).to(be, 2)
+                expect(command.name).to(be, 'a')
+                expect(param).to(be, 'one')
+            } })
+        })
+        var a = lang._commands[1]
+        var code = new evolu.Code(lang)
+        code.rule([[a, 'one'], [a, 'one']])
+    })
+    
+    it('should init condition', function() {
+        var lang = evolu.lang('LNG', function() {
+            this.condition('a', function() { this.inited = 1 })
+        })
+        var code = new evolu.Code(lang)
+        var a = lang._commands[1]
+        
+        var one = code.rule([[a, 1], [a]])
+        var two = code.rule([[a, 1]])
+        
+        expect(one.required).to(be, 2)
+        expect(two.required).to(be, 1)
+        expect(code._conditions).to(eql, { 'a 1': [one, two], 'a': [one] })
+        
+        expect(code).to(have_property, 'inited', 1)
     })
 })
