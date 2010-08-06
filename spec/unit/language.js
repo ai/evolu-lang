@@ -83,8 +83,8 @@ JSpec.describe('darwin.Language', function() {
         expect(code).to(have_property, 'language', lang)
         
         expect(code._rules).to(eql, [
-            { commands: [[b]],                  required: 0 },
-            { commands: [[a, 'two'], [b, 256]], required: 0 }
+            { commands: [[b]],                  required: 0, id: 0 },
+            { commands: [[a, 'two'], [b, 256]], required: 0, id: 1 }
         ])
     })
     
@@ -113,7 +113,7 @@ JSpec.describe('darwin.Language', function() {
         })
         var a = lang._commands[1]
         var code = new evolu.Code(lang)
-        code.rule([[a, 'one'], [a, 'one']])
+        code._add([[a, 'one'], [a, 'one']])
     })
     
     it('should init condition', function() {
@@ -123,8 +123,8 @@ JSpec.describe('darwin.Language', function() {
         var code = new evolu.Code(lang)
         var a = lang._commands[1]
         
-        var one = code.rule([[a, 1], [a]])
-        var two = code.rule([[a, 1]])
+        var one = code._add([[a, 1], [a]])
+        var two = code._add([[a, 1]])
         
         expect(one.required).to(be, 2)
         expect(two.required).to(be, 1)
