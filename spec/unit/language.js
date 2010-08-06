@@ -83,37 +83,60 @@ JSpec.describe('darwin.Language', function() {
         expect(code).to(have_property, 'language', lang)
         
         expect(code._rules).to(eql, [
-            { commands: [[b]],                  required: 0, id: 0 },
-            { commands: [[a, 'two'], [b, 256]], required: 0, id: 1 }
+            {
+                id: 0,
+                lines: [{ command: b }],
+                required: 0
+            },
+            {
+                id: 1,
+                lines: [{ command: a, param: 'two' },
+                        { command: b, param: 256   }],
+                required: 0
+            }
         ])
     })
     
     it('should call initializers on compiling', function() {
+        var currentCode, currentRule, currentLine, bCalls = 0
         var lang = evolu.lang('LNG', function() {
             this.command('a', { init: function() { }, params: ['one', 'two'] }).
-                 command('b', { init: function() { } })
+                 command('b', {
+                    init: function() {
+                        bCalls += 1
+                        currentCode = this
+                        currentRule = this.currentRule
+                        currentLine = this.currentLine
+                    }
+                 })
         })
         var a = lang._commands[1], b = lang._commands[2]
         
-        var rule = { commands: [[a, 'one'], [b]], required: 0 }
-        expect(a).to(receive, 'init').with_args(rule, a, 'one')
-        expect(b).to(receive, 'init').with_args(rule, b)
+        expect(a).to(receive, 'init').with_args('one')
         
-        lang.compile([1, 128, 2])
+        var code = lang.compile([1, 128, 2])
+        
+        expect(bCalls).to(be, 1)
+        expect(currentCode).to(be, code)
+        expect(currentRule).to(be, code._rules[0])
+        expect(currentLine).to(be, code._rules[0].lines[1])
     })
     
     it('should init command', function() {
         var lang = evolu.lang('LNG', function() {
-            this.command('a', { init: function(rule, command, param) {
+            this.command('a', { init: function(param) {
                 expect(this).to(be_an_instance_of, evolu.Code)
-                expect(rule.commands.length).to(be, 2)
-                expect(command.name).to(be, 'a')
+                expect(this.currentRule.lines.length).to(be, 2)
+                expect(this.currentLine.command.name).to(be, 'a')
                 expect(param).to(be, 'one')
             } })
         })
         var a = lang._commands[1]
         var code = new evolu.Code(lang)
-        code._add([[a, 'one'], [a, 'one']])
+        code._add([
+            { command: a,  param: 'one' },
+            { command: a,  param: 'one' }
+        ])
     })
     
     it('should init condition', function() {
@@ -123,8 +146,8 @@ JSpec.describe('darwin.Language', function() {
         var code = new evolu.Code(lang)
         var a = lang._commands[1]
         
-        var one = code._add([[a, 1], [a]])
-        var two = code._add([[a, 1]])
+        var one = code._add([{ command: a,  param: 1 }, { command: a }])
+        var two = code._add([{ command: a,  param: 1 }])
         
         expect(one.required).to(be, 2)
         expect(two.required).to(be, 1)
