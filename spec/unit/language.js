@@ -100,7 +100,9 @@ JSpec.describe('darwin.Language', function() {
     it('should call initializers on compiling', function() {
         var currentCode, currentRule, currentLine, bCalls = 0
         var lang = evolu.lang('LNG', function() {
-            this.command('a', { init: function() { }, params: ['one', 'two'] }).
+            this.command('a', {
+                    init: function() { }, params: ['one', 'two']
+                 }).
                  command('b', {
                     init: function() {
                         bCalls += 1
@@ -124,12 +126,14 @@ JSpec.describe('darwin.Language', function() {
     
     it('should init command', function() {
         var lang = evolu.lang('LNG', function() {
-            this.command('a', { init: function(param) {
-                expect(this).to(be_an_instance_of, evolu.Code)
-                expect(this.currentRule.lines.length).to(be, 2)
-                expect(this.currentLine.command.name).to(be, 'a')
-                expect(param).to(be, 'one')
-            } })
+            this.command('a', {
+                init: function(param) {
+                    expect(this).to(be_an_instance_of, evolu.Code)
+                    expect(this.currentRule.lines.length).to(be, 2)
+                    expect(this.currentLine.command.name).to(be, 'a')
+                    expect(param).to(be, 'one')
+                }
+            })
         })
         var a = lang._commands[1]
         var code = new evolu.Code(lang)
