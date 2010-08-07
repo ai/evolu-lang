@@ -99,6 +99,24 @@ JSpec.describe('darwin.Language', function() {
         ])
     })
     
+    it('install commands to code', function() {
+        var result = ''
+        var lang = evolu.lang('LNG', function() {
+            this.command('a', {
+                install: function() {
+                    this.a = 1
+                    result += '1'
+                }
+            })
+        })
+        var a = lang._commands[1]
+        var code = new evolu.Code(lang)
+        code._add([ { command: a }, { command: a } ])
+        
+        expect(result).to(be, '1')
+        expect(code).to(have_property, 'a', 1)
+    })
+    
     it('should add package changes', function() {
         var lang = evolu.lang('LNG', function() {
             this.add(function(lng) { lng.one = 1 })
