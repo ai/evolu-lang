@@ -34,9 +34,11 @@ JSpec.describe('darwin.Code', function() {
     })
     
     it('should init command', function() {
+        var result = ''
         var lang = evolu.lang('LNG', function() {
             this.command('a', {
                 init: function(param) {
+                    result += 'a'
                     expect(this).to(be_an_instance_of, evolu.Code)
                     expect(this.currentRule.lines.length).to(be, 2)
                     expect(this.currentLine.command.name).to(be, 'a')
@@ -50,6 +52,7 @@ JSpec.describe('darwin.Code', function() {
             { command: a,  param: 'one' },
             { command: a,  param: 'one' }
         ])
+        expect(result).to(be, 'aa')
     })
     
     it('should init condition', function() {

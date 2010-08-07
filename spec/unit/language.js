@@ -98,4 +98,11 @@ JSpec.describe('darwin.Language', function() {
             }
         ])
     })
+    
+    it('should add package changes', function() {
+        var lang = evolu.lang('LNG', function() {
+            this.add(function(lng) { lng.one = 1 })
+        })
+        expect(lang).to(have_property, 'one', 1)
+    })
 })
