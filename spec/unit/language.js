@@ -35,7 +35,7 @@ JSpec.describe('darwin.Language', function() {
                  command('two',   { b: 2, position: 2 })
         })
         
-        expect(lang._commands).to(eql, ['separator',
+        expect(lang._commands).to(eql, [lang._separator,
                                         { name: 'one',   run: func },
                                         { name: 'two',   b: 2 },
                                         { name: 'three', c: 3 }])
@@ -49,7 +49,7 @@ JSpec.describe('darwin.Language', function() {
         })
         
         expect(lang._commands).to(eql, [
-            'separator',
+            lang._separator,
             { name: 'if_a', a: 1, init: lang._initCondition, condition: true },
             { name: 'if_b', b: 2, init: lang._initCondition, condition: true }
         ])
