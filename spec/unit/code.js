@@ -1,36 +1,33 @@
-JSpec.describe('darwin.Code', function() {
+JSpec.describe('evolu.Code', function() {
     it('should return original program bytes', function() {
         evolu.lang('LNG', function() { })
         var code = evolu.compile('EVOLU:LNG:abc')
         expect(code.bytes).to(eql, [97, 98, 99])
         expect(code.toSource()).to(eql, 'EVOLU:LNG:abc')
+        
+        code.bytes = [98, 99, 100]
+        expect(code.toSource()).to(eql, 'EVOLU:LNG:bcd')
     })
     
-    it('should call initializers on compiling', function() {
-        var currentCode, currentRule, currentLine, bCalls = 0
+    it('should add new rule by DSL', function() {
         var lang = evolu.lang('LNG', function() {
-            this.command('a', {
-                    init: function() { }, params: ['one', 'two']
-                 }).
-                 command('b', {
-                    init: function() {
-                        bCalls += 1
-                        currentCode = this
-                        currentRule = this.currentRule
-                        currentLine = this.currentLine
-                    }
-                 })
+            this.condition('a').
+                 command('b', { params: ['one', 'two'] })
         })
-        var a = lang._commands[1], b = lang._commands[2]
+        var code = new evolu.Code(lang)
+        code.rule(lang.commands.a.line(),
+                  lang.commands.a.line(0),
+                  lang.commands.b.line('two'))
         
-        expect(a).to(receive, 'init').with_args('one')
-        
-        var code = lang.compile([1, 128, 2])
-        
-        expect(bCalls).to(be, 1)
-        expect(currentCode).to(be, code)
-        expect(currentRule).to(be, code._rules[0])
-        expect(currentLine).to(be, code._rules[0].lines[1])
+        expect(code._rules).to(eql, [{
+            lines: [lang.commands.a.line(),
+                    lang.commands.a.line(0),
+                    lang.commands.b.line('two')],
+            required: 2,
+            id: 0
+        }])
+        expect(code.bytes).to(eql, [1, 1, 128, 2, 129, 0])
+        expect(code.toSource()).to(eql, 'EVOLU:LNG:\x01\x01\x80\x02\x81\x00')
     })
     
     it('should init command', function() {
@@ -46,12 +43,8 @@ JSpec.describe('darwin.Code', function() {
                 }
             })
         })
-        var a = lang._commands[1]
         var code = new evolu.Code(lang)
-        code._add([
-            { command: a,  param: 'one' },
-            { command: a,  param: 'one' }
-        ])
+        code.rule(lang.commands.a.line('one'), lang.commands.a.line('one'))
         expect(result).to(be, 'aa')
     })
     
@@ -60,10 +53,9 @@ JSpec.describe('darwin.Code', function() {
             this.condition('a', function() { this.inited = 1 })
         })
         var code = new evolu.Code(lang)
-        var a = lang._commands[1]
         
-        var one = code._add([{ command: a,  param: 1 }, { command: a }])
-        var two = code._add([{ command: a,  param: 1 }])
+        var one = code.rule(lang.commands.a.line(1), lang.commands.a.line())
+        var two = code.rule(lang.commands.a.line(1))
         
         expect(one.required).to(be, 2)
         expect(two.required).to(be, 1)
@@ -77,9 +69,9 @@ JSpec.describe('darwin.Code', function() {
             this.condition('if_a').condition('if_b')
         })
         var code = new evolu.Code(lang)
-        var rule0 = code._add([{ command: lang._commands[1] }])
-        var rule1 = code._add([{ command: lang._commands[1],  param: 1 },
-                               { command: lang._commands[2],  param: 2 }])
+        var rule0 = code.rule(lang.commands.if_a.line())
+        var rule1 = code.rule(lang.commands.if_a.line(1),
+                              lang.commands.if_b.line(2))
                    
         expect(code._toRun).to(eql, [])
         expect(code._toStop).to(eql, [])
@@ -129,11 +121,10 @@ JSpec.describe('darwin.Code', function() {
                  })
         })
         var code = new evolu.Code(lang)
-        code._add([{ command: lang._commands[2] },
-                   { command: lang._commands[4], param: 'NO' }])
-        var rule = code._add([{ command: lang._commands[1] },
-                              { command: lang._commands[3] },
-                              { command: lang._commands[4], param: 'TWO' }])
+        code.rule(lang.commands.if_b.line(), lang.commands.two.line('NO'))
+        var rule = code.rule(lang.commands.if_a.line(),
+                             lang.commands.one.line(),
+                             lang.commands.two.line('TWO'))
         
         code.up('if_a')
         code.run()
@@ -158,10 +149,8 @@ JSpec.describe('darwin.Code', function() {
                  })
         })
         var code = new evolu.Code(lang)
-        code._add([{ command: lang._commands[1] },
-                   { command: lang._commands[3] }])
-        code._add([{ command: lang._commands[2] },
-                   { command: lang._commands[4] }])
+        code.rule(lang.commands.if_a.line(), lang.commands.one.line())
+        code.rule(lang.commands.if_b.line(), lang.commands.two.line())
         
         code.up('if_a')
         code.up('if_b')
@@ -179,11 +168,11 @@ JSpec.describe('darwin.Code', function() {
                  command('two', function() { result += '2' })
         })
         var code = new evolu.Code(lang)
-        var first  = code._add([{ command: lang._commands[1] },
-                                { command: lang._commands[2] }])
-        var second = code._add([{ command: lang._commands[3] }])
-        var third  = code._add([{ command: lang._commands[2] },
-                                { command: lang._commands[3] }])
+        var first  = code.rule(lang.commands.if_a.line(),
+                               lang.commands.one.line())
+        var second = code.rule(lang.commands.two.line())
+        var third  = code.rule(lang.commands.one.line(),
+                               lang.commands.two.line())
         
         expect(first).not_to(have_property, 'initializer', true)
         expect(second).to(have_property, 'initializer', true)

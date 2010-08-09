@@ -1,4 +1,4 @@
-JSpec.describe('darwin.Language', function() {
+JSpec.describe('evolu.Language', function() {
     before_each(function() {
         evolu._languages = {}
     })
@@ -30,15 +30,21 @@ JSpec.describe('darwin.Language', function() {
     it('should add commands', function() {
         var func = function() { }
         var lang = evolu.lang('LNG', function() {
-            this.command('one',   func).
-                 command('three', { c: 3 }).
-                 command('two',   { b: 2, position: 2 })
+            this.command('a', func).
+                 command('c', { c: 3 }).
+                 command('b', { b: 2, position: 2 })
         })
         
-        expect(lang._commands).to(eql, [lang._separator,
-                                        { name: 'one',   run: func },
-                                        { name: 'two',   b: 2 },
-                                        { name: 'three', c: 3 }])
+        expect(lang.commands).to(eql, {
+            separator: lang._separator,
+            a:         { name: 'a', line: lang._line, run: func },
+            b:         { name: 'b', line: lang._line, b: 2 },
+            c:         { name: 'c', line: lang._line, c: 3 }
+        })
+        expect(lang._list).to(eql, [lang._separator,
+                                    { name: 'a', line: lang._line, run: func },
+                                    { name: 'b', line: lang._line, b: 2 },
+                                    { name: 'c', line: lang._line, c: 3 }])
     })
     
     it('should add condition', function() {
@@ -48,10 +54,16 @@ JSpec.describe('darwin.Language', function() {
                  condition('if_a', { a: 1, position: 1 })
         })
         
-        expect(lang._commands).to(eql, [
+        expect(lang._list).to(eql, [
             lang._separator,
-            { name: 'if_a', a: 1, init: lang._initCondition, condition: true },
-            { name: 'if_b', b: 2, init: lang._initCondition, condition: true }
+            {
+                name: 'if_a', a: 1,
+                condition: true, line: lang._line, init: lang._initCondition
+            },
+            {
+                name: 'if_b', b: 2,
+                condition: true, line: lang._line, init: lang._initCondition
+            }
         ])
     })
     
@@ -75,7 +87,6 @@ JSpec.describe('darwin.Language', function() {
             this.command('a', { params: ['one', 'two'] }).
                  command('b', { init: function() {} })
         })
-        var a = lang._commands[1], b = lang._commands[2]
         
         var code = lang.compile([128, 5, 0, 1, 128, 131, 2, 130, 128])
         
@@ -85,18 +96,27 @@ JSpec.describe('darwin.Language', function() {
         expect(code._rules).to(eql, [
             {
                 id: 0,
-                lines: [{ command: b }],
+                lines: [lang.commands.b.line()],
                 required: 0,
                 initializer: true
             },
             {
                 id: 1,
-                lines: [{ command: a, param: 'two' },
-                        { command: b, param: 256   }],
+                lines: [lang.commands.a.line('two'), lang.commands.b.line(256)],
                 required: 0,
                 initializer: true
             }
         ])
+    })
+    
+    it('should create rule line for command', function() {
+        var lang = evolu.lang('LNG', function() {
+            this.command('a')
+        })
+        expect(lang.commands.a.line()).
+            to(eql, { command: lang.commands.a })
+        expect(lang.commands.a.line('one')).
+            to(eql, { command: lang.commands.a, param: 'one' })
     })
     
     it('install commands to code', function() {
@@ -109,18 +129,45 @@ JSpec.describe('darwin.Language', function() {
                 }
             })
         })
-        var a = lang._commands[1]
         var code = new evolu.Code(lang)
-        code._add([ { command: a }, { command: a } ])
+        code.rule(lang.commands.a.line(), lang.commands.a.line())
         
         expect(result).to(be, '1')
         expect(code).to(have_property, 'a', 1)
     })
     
-    it('should add package changes', function() {
+    it('should call initializers on compiling', function() {
+        var currentCode, currentRule, currentLine, bCalls = 0
         var lang = evolu.lang('LNG', function() {
-            this.add(function(lng) { lng.one = 1 })
+            this.command('a', {
+                    init: function() { }, params: ['one', 'two']
+                 }).
+                 command('b', {
+                    init: function() {
+                        bCalls += 1
+                        currentCode = this
+                        currentRule = this.currentRule
+                        currentLine = this.currentLine
+                    }
+                 })
+        })
+        
+        expect(lang.commands.a).to(receive, 'init').with_args('one')
+        
+        var code = lang.compile([1, 128, 2])
+        
+        expect(bCalls).to(be, 1)
+        expect(currentCode).to(be, code)
+        expect(currentRule).to(be, code._rules[0])
+        expect(currentLine).to(be, code._rules[0].lines[1])
+    })
+    
+    it('should add package changes', function() {
+        var result
+        var lang = evolu.lang('LNG', function() {
+            result = this.add(function(lng) { lng.one = 1 })
         })
         expect(lang).to(have_property, 'one', 1)
+        expect(result).to(be, lang)
     })
 })
