@@ -11,18 +11,15 @@ JSpec.describe('evolu.Code', function() {
     
     it('should add new rule by DSL', function() {
         var lang = evolu.lang('LNG', function() {
-            this.condition('a').
-                 command('b', { params: ['one', 'two'] })
+            this.condition('a').command('b', { params: ['one', 'two'] })
         })
         var code = new evolu.Code(lang)
-        code.rule(lang.commands.a.line(),
-                  lang.commands.a.line(0),
-                  lang.commands.b.line('two'))
+        code.rule('a', ['a', 0], ['b', 'two'])
         
         expect(code._rules).to(eql, [{
-            lines: [lang.commands.a.line(),
-                    lang.commands.a.line(0),
-                    lang.commands.b.line('two')],
+            lines: [{ command: lang.commands.a },
+                    { command: lang.commands.a, param: 0 },
+                    { command: lang.commands.b, param: 'two' }],
             required: 2,
             id: 0
         }])
@@ -32,7 +29,7 @@ JSpec.describe('evolu.Code', function() {
     
     it('should init command', function() {
         var result = ''
-        var lang = evolu.lang('LNG', function() {
+        var code = new evolu.Code(evolu.lang('LNG', function() {
             this.command('a', {
                 init: function(param) {
                     result += 'a'
@@ -42,20 +39,18 @@ JSpec.describe('evolu.Code', function() {
                     expect(param).to(be, 'one')
                 }
             })
-        })
-        var code = new evolu.Code(lang)
-        code.rule(lang.commands.a.line('one'), lang.commands.a.line('one'))
+        }))
+        code.rule(['a', 'one'], ['a', 'one'])
         expect(result).to(be, 'aa')
     })
     
     it('should init condition', function() {
-        var lang = evolu.lang('LNG', function() {
+        var code = new evolu.Code(evolu.lang('LNG', function() {
             this.condition('a', function() { this.inited = 1 })
-        })
-        var code = new evolu.Code(lang)
+        }))
         
-        var one = code.rule(lang.commands.a.line(1), lang.commands.a.line())
-        var two = code.rule(lang.commands.a.line(1))
+        var one = code.rule(['a', 1], ['a'])
+        var two = code.rule(['a', 1])
         
         expect(one.required).to(be, 2)
         expect(two.required).to(be, 1)
@@ -65,15 +60,13 @@ JSpec.describe('evolu.Code', function() {
     })
     
     it('should update running list', function() {
-        var lang = evolu.lang('LNG', function() {
+        var code = new evolu.Code(evolu.lang('LNG', function() {
             this.condition('if_a').condition('if_b')
-        })
-        var code = new evolu.Code(lang)
-        var rule0 = code.rule(lang.commands.if_a.line())
-        var rule1 = code.rule(lang.commands.if_a.line(1),
-                              lang.commands.if_b.line(2))
+        }))
+        var rule0 = code.rule(['if_a'])
+        var rule1 = code.rule(['if_a', 1], ['if_b', 2])
                    
-        expect(code._toRun).to(eql, [])
+        expect(code._toRun). to(eql, [])
         expect(code._toStop).to(eql, [])
         
         expect(rule0.required).to(be, 1)
@@ -106,7 +99,7 @@ JSpec.describe('evolu.Code', function() {
     
     it('should run rules', function() {
         var currentCode, currentRule, currentLine, result = ''
-        var lang = evolu.lang('LNG', function() {
+        var code = new evolu.Code(evolu.lang('LNG', function() {
             this.condition('if_a').
                  condition('if_b').
                  command('one', function() {
@@ -119,12 +112,9 @@ JSpec.describe('evolu.Code', function() {
                     result += '2'
                     expect(param).to(be, 'TWO')
                  })
-        })
-        var code = new evolu.Code(lang)
-        code.rule(lang.commands.if_b.line(), lang.commands.two.line('NO'))
-        var rule = code.rule(lang.commands.if_a.line(),
-                             lang.commands.one.line(),
-                             lang.commands.two.line('TWO'))
+        }))
+        code.rule(['if_b'], ['two', 'NO'])
+        var rule = code.rule(['if_a'], ['one'], ['two', 'TWO'])
         
         code.on('if_a')
         code.run()
@@ -137,7 +127,7 @@ JSpec.describe('evolu.Code', function() {
     
     it('should change running list after run', function() {
         var result = ''
-        var lang = evolu.lang('LNG', function() {
+        var code = new evolu.Code(evolu.lang('LNG', function() {
             this.condition('if_a').
                  condition('if_b').
                  command('one', function() {
@@ -147,10 +137,9 @@ JSpec.describe('evolu.Code', function() {
                  command('two', function(param) {
                     result += '2'
                  })
-        })
-        var code = new evolu.Code(lang)
-        code.rule(lang.commands.if_a.line(), lang.commands.one.line())
-        code.rule(lang.commands.if_b.line(), lang.commands.two.line())
+        }))
+        code.rule(['if_a'], ['one'])
+        code.rule(['if_b'], ['two'])
         
         code.on('if_a')
         code.on('if_b')
@@ -162,17 +151,14 @@ JSpec.describe('evolu.Code', function() {
     
     it('should initialize code', function() {
         var result = ''
-        var lang = evolu.lang('LNG', function() {
+        var code = new evolu.Code(evolu.lang('LNG', function() {
             this.condition('if_a').
                  command('one', function() { result += '1' }).
                  command('two', function() { result += '2' })
-        })
-        var code = new evolu.Code(lang)
-        var first  = code.rule(lang.commands.if_a.line(),
-                               lang.commands.one.line())
-        var second = code.rule(lang.commands.two.line())
-        var third  = code.rule(lang.commands.one.line(),
-                               lang.commands.two.line())
+        }))
+        var first  = code.rule(['if_a'], ['one'])
+        var second = code.rule(['two'])
+        var third  = code.rule(['one'], ['two'])
         
         expect(first).not_to(have_property, 'initializer', true)
         expect(second).to(have_property, 'initializer', true)

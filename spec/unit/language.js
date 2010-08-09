@@ -34,14 +34,14 @@ JSpec.describe('evolu.Language', function() {
         
         expect(lang.commands).to(eql, {
             separator: lang._separator,
-            a:         { name: 'a', line: lang._line, run: func },
-            b:         { name: 'b', line: lang._line, b: 2 },
-            c:         { name: 'c', line: lang._line, c: 3 }
+            a:         { name: 'a', run: func },
+            b:         { name: 'b', b: 2 },
+            c:         { name: 'c', c: 3 }
         })
         expect(lang._list).to(eql, [lang._separator,
-                                    { name: 'a', line: lang._line, run: func },
-                                    { name: 'b', line: lang._line, b: 2 },
-                                    { name: 'c', line: lang._line, c: 3 }])
+                                    { name: 'a', run: func },
+                                    { name: 'b', b: 2 },
+                                    { name: 'c', c: 3 }])
     
         var another = evolu.lang('ANZ', function() { })
         expect(another.commands).to(eql, { separator: another._separator })
@@ -57,14 +57,8 @@ JSpec.describe('evolu.Language', function() {
         
         expect(lang._list).to(eql, [
             lang._separator,
-            {
-                name: 'if_a', a: 1,
-                condition: true, line: lang._line, init: lang._initCondition
-            },
-            {
-                name: 'if_b', b: 2,
-                condition: true, line: lang._line, init: lang._initCondition
-            }
+            { name: 'if_a', a: 1, condition: true, init: lang._initCondition },
+            { name: 'if_b', b: 2, condition: true, init: lang._initCondition }
         ])
     })
     
@@ -99,27 +93,18 @@ JSpec.describe('evolu.Language', function() {
         expect(code._rules).to(eql, [
             {
                 id: 0,
-                lines: [lang.commands.b.line()],
+                lines: [{ command: lang.commands.b }],
                 required: 0,
                 initializer: true
             },
             {
                 id: 1,
-                lines: [lang.commands.a.line('two'), lang.commands.b.line(256)],
+                lines: [{ command: lang.commands.a, param: 'two' },
+                        { command: lang.commands.b, param:  256  }],
                 required: 0,
                 initializer: true
             }
         ])
-    })
-    
-    it('should create rule line for command', function() {
-        var lang = evolu.lang('LNG', function() {
-            this.command('a')
-        })
-        expect(lang.commands.a.line()).
-            to(eql, { command: lang.commands.a })
-        expect(lang.commands.a.line('one')).
-            to(eql, { command: lang.commands.a, param: 'one' })
     })
     
     it('install commands to code', function() {
@@ -133,7 +118,7 @@ JSpec.describe('evolu.Language', function() {
             })
         })
         var code = new evolu.Code(lang)
-        code.rule(lang.commands.a.line(), lang.commands.a.line())
+        code.rule('a', 'a')
         
         expect(result).to(be, '1')
         expect(code).to(have_property, 'a', 1)

@@ -7,13 +7,14 @@ JSpec.describe('evolu.standard', function() {
         expect(lang._list.length).to(be, 4)
         
         var code = new evolu.Code(lang)
-        code.rule(lang.commands.var_up.line(2))
-        code.rule(lang.commands.if_var_more_0.line(1),
-                  lang.commands.var_down.line(1))
-        code.rule(lang.commands.if_var_more_0.line(2),
-                  lang.commands.var_down.line(2),
-                  lang.commands.var_up.line(1),
-                  lang.commands.var_up.line(1))
+        code.rule(['var_up',        2],
+                  ['var_up'          ])
+        code.rule(['if_var_more_0', 1],
+                  ['var_down',      1])
+        code.rule(['if_var_more_0', 2],
+                  ['var_down',      2],
+                  ['var_up',        1],
+                  ['var_up',        1])
         
         expect(code._variables).to(eql, { 1: 0, 2: 0 })
         
