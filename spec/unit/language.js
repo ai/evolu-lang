@@ -1,9 +1,6 @@
 JSpec.describe('evolu.Language', function() {
-    before_each(function() {
-        evolu._languages = {}
-    })
-    
     it('should create new language', function() {
+        evolu._languages = {}
         expect(evolu.lang('LNG')).to(be_undefined)
     
         var lang = evolu.lang('LNG', function() { this.a = 1 })
@@ -45,6 +42,10 @@ JSpec.describe('evolu.Language', function() {
                                     { name: 'a', line: lang._line, run: func },
                                     { name: 'b', line: lang._line, b: 2 },
                                     { name: 'c', line: lang._line, c: 3 }])
+    
+        var another = evolu.lang('ANZ', function() { })
+        expect(another.commands).to(eql, { separator: another._separator })
+        expect(another._list).to(eql, [ another._separator ])
     })
     
     it('should add condition', function() {
@@ -68,6 +69,8 @@ JSpec.describe('evolu.Language', function() {
     })
     
     it('should find language for compile', function() {
+        evolu._languages = {}
+        
         expect(function() {
             evolu.compile('NO PROGRAM')
         }).to(throw_error, /isn't Evolu program/)

@@ -79,24 +79,24 @@ JSpec.describe('evolu.Code', function() {
         expect(rule0.required).to(be, 1)
         expect(rule1.required).to(be, 2)
         
-        code.up('if_a')
+        code.on('if_a')
         expect(code._running).to(eql, { })
         expect(rule0.required).to(be, 0)
         expect(rule1.required).to(be, 2)
         code.run()
         expect(code._running).to(eql, { 0: rule0 })
         
-        code.up('if_a', 1)
+        code.on('if_a', 1)
         expect(rule1.required).to(be, 1)
         code.run()
         expect(code._running).to(eql, { 0: rule0 })
         
-        code.up('if_b', 2)
+        code.on('if_b', 2)
         expect(rule1.required).to(be, 0)
         code.run()
         expect(code._running).to(eql, { 0: rule0, 1: rule1 })
         
-        code.down('if_a')
+        code.off('if_a')
         expect(code._running).to(eql, { 0: rule0, 1: rule1 })
         expect(rule0.required).to(be, 1)
         expect(rule1.required).to(be, 0)
@@ -126,7 +126,7 @@ JSpec.describe('evolu.Code', function() {
                              lang.commands.one.line(),
                              lang.commands.two.line('TWO'))
         
-        code.up('if_a')
+        code.on('if_a')
         code.run()
         
         expect(result).to(be, '12')
@@ -142,7 +142,7 @@ JSpec.describe('evolu.Code', function() {
                  condition('if_b').
                  command('one', function() {
                     result += '1'
-                    this.down('if_b')
+                    this.off('if_b')
                  }).
                  command('two', function(param) {
                     result += '2'
@@ -152,8 +152,8 @@ JSpec.describe('evolu.Code', function() {
         code.rule(lang.commands.if_a.line(), lang.commands.one.line())
         code.rule(lang.commands.if_b.line(), lang.commands.two.line())
         
-        code.up('if_a')
-        code.up('if_b')
+        code.on('if_a')
+        code.on('if_b')
         code.run()
         code.run()
         
