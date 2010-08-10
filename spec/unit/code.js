@@ -167,4 +167,23 @@ JSpec.describe('evolu.Code', function() {
         code.init()
         expect(result).to(be, '212')
     })
+    
+    it('should allow to listen events', function() {
+        var code = new evolu.Code(evolu.lang('LNG', function() { }))
+        var runned = ''
+        
+        code.listen('a', function(one, two) {
+            runned += 'a'
+            expect(one).to(be, 1)
+            expect(two).to(be, 2)
+            expect(this).to(be, code)
+        })
+        code.listen('a', function() { runned += 'A' })
+        code.listen('b', function() { runned += 'b' })
+        
+        code.fire('a', [1, 2])
+        code.fire('no')
+        
+        expect(runned).to(be, 'aA')
+    })
 })

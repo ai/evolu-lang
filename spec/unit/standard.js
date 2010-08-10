@@ -40,6 +40,23 @@ JSpec.describe('evolu.standard', function() {
         expect(runned).to(be, '0211')
     })
     
+    it('should fire event when change variable', function() {
+        var code = new evolu.Code(evolu.lang('LNG', function() {
+            this.add(evolu.standard.variables)
+        }))
+        
+        code.rule(['var_up', 2], ['var_down'], ['var_down', 1])
+        
+        var changes = []
+        code.listen('var_changed', function(name, value, diff) {
+            changes.push([name, value, diff])
+        })
+        
+        code.init()
+        
+        expect(changes).to(eql, [[2, 1, 1], [1, -1, -1]])
+    })
+    
     it('should allow add variables command', function() {
         var pack = evolu.lang('PACK', function() {
             this.add(evolu.standard.variables)
