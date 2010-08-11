@@ -90,19 +90,29 @@ JSpec.describe('evolu.Language', function() {
         expect(code).to(be_an_instance_of, evolu.Code)
         expect(code).to(have_property, 'language', lang)
         
-        expect(code._rules).to(eql, [
+        expect(code.rules).to(eql, [
             {
                 id: 0,
                 lines: [{ command: lang.commands.b }],
+                code: code,
                 required: 0,
-                initializer: true
+                initializer: true,
+                on: evolu.Rule.prototype.on,
+                off: evolu.Rule.prototype.off,
+                run: evolu.Rule.prototype.run
             },
             {
                 id: 1,
                 lines: [{ command: lang.commands.a, param: 'two' },
                         { command: lang.commands.b, param:  256  }],
+                code: code,
+                on: code._ruleOn,
+                off: code._ruleOff,
                 required: 0,
-                initializer: true
+                initializer: true,
+                on: evolu.Rule.prototype.on,
+                off: evolu.Rule.prototype.off,
+                run: evolu.Rule.prototype.run
             }
         ])
     })
@@ -146,8 +156,8 @@ JSpec.describe('evolu.Language', function() {
         
         expect(bCalls).to(be, 1)
         expect(currentCode).to(be, code)
-        expect(currentRule).to(be, code._rules[0])
-        expect(currentLine).to(be, code._rules[0].lines[1])
+        expect(currentRule).to(be, code.rules[0])
+        expect(currentLine).to(be, code.rules[0].lines[1])
     })
     
     it('should add package changes', function() {

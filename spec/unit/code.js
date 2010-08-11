@@ -16,10 +16,14 @@ JSpec.describe('evolu.Code', function() {
         var code = new evolu.Code(lang)
         code.rule('a', ['a', 0], ['b', 'two'])
         
-        expect(code._rules).to(eql, [{
+        expect(code.rules).to(eql, [{
             lines: [{ command: lang.commands.a },
                     { command: lang.commands.a, param: 0 },
                     { command: lang.commands.b, param: 'two' }],
+            code: code,
+            on: evolu.Rule.prototype.on,
+            off: evolu.Rule.prototype.off,
+            run: evolu.Rule.prototype.run,
             required: 2,
             id: 0
         }])
@@ -59,42 +63,77 @@ JSpec.describe('evolu.Code', function() {
         expect(code).to(have_property, 'inited', 1)
     })
     
-    it('should update running list', function() {
+    it('should have condition index', function() {
+        var code = new evolu.Code(evolu.lang('LNG', function() {
+            this.condition('a').condition('b')
+        }))
+        code.rule(['a'], ['b', 1])
+        code.rule(['a', 2], ['b', 1])
+        
+        expect(code.conditions('a')).to(eql,    [code.rules[0]])
+        expect(code.conditions('a', 2)).to(eql, [code.rules[1]])
+        expect(code.conditions('b', 1)).to(eql, [code.rules[0], code.rules[1]])
+        expect(code.conditions('b', 2)).to(be_empty)
+    })
+    
+    it('should enable/disable rule', function() {
+        var code = new evolu.Code(evolu.lang('LNG', function() {
+            this.condition('if_a').condition('if_b')
+        }))
+        var rule = code.rule('if_a', 'if_b')
+        
+        expect(code._changes). to(eql, [])
+        expect(rule.required).to(be, 2)
+        
+        rule.on()
+        expect(code._changes).to(be_empty)
+        expect(rule.required).to(be, 1)
+        
+        rule.off()
+        expect(code._changes).to(be_empty)
+        expect(rule.required).to(be, 2)
+        
+        rule.on(2)
+        rule.off(2)
+        rule.on(2)
+        expect(code._changes).to(eql, { 0: ['add', rule] })
+        expect(rule.required).to(be, 0)
+        
+        code.run()
+        expect(code._running).to(eql, { 0: rule })
+        expect(code._changes). to(be_empty)
+        
+        rule.off(2)
+        rule.on(2)
+        rule.off(2)
+        expect(code._changes).to(eql, { 0: ['del', rule] })
+        expect(code._running).to(eql, { 0: rule })
+        
+        code.run()
+        expect(code._running).to(be_empty)
+    })
+    
+    it('should enable/disable rules by condition', function() {
         var code = new evolu.Code(evolu.lang('LNG', function() {
             this.condition('if_a').condition('if_b')
         }))
         var rule0 = code.rule(['if_a'])
         var rule1 = code.rule(['if_a', 1], ['if_b', 2])
-                   
-        expect(code._toRun). to(eql, [])
-        expect(code._toStop).to(eql, [])
         
-        expect(rule0.required).to(be, 1)
-        expect(rule1.required).to(be, 2)
+        var changes = ''
+        rule0.on = rule1.on = function(count) {
+            changes += this.id + '+' + (count || 1) + ' '
+        }
+        rule0.off = rule1.off = function(count) {
+            changes += this.id + '-' + (count || 1) + ' '
+        }
         
         code.on('if_a')
-        expect(code._running).to(eql, { })
-        expect(rule0.required).to(be, 0)
-        expect(rule1.required).to(be, 2)
-        code.run()
-        expect(code._running).to(eql, { 0: rule0 })
-        
         code.on('if_a', 1)
-        expect(rule1.required).to(be, 1)
-        code.run()
-        expect(code._running).to(eql, { 0: rule0 })
-        
         code.on('if_b', 2)
-        expect(rule1.required).to(be, 0)
-        code.run()
-        expect(code._running).to(eql, { 0: rule0, 1: rule1 })
-        
         code.off('if_a')
-        expect(code._running).to(eql, { 0: rule0, 1: rule1 })
-        expect(rule0.required).to(be, 1)
-        expect(rule1.required).to(be, 0)
-        code.run()
-        expect(code._running).to(eql, { 1: rule1 })
+        
+        expect(changes).to(be, '0+1 1+1 1+1 0-1 ')
     })
     
     it('should run rules', function() {
