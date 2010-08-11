@@ -1,3 +1,5 @@
+// Run Evolu.js tests in Node.js
+
 require.paths.unshift('spec', 'lib')
 require('jspec')
 require('evolu')
