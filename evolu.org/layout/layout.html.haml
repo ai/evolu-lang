@@ -1,0 +1,11 @@
+!!! 5
+%head
+  %meta( charset='UTF-8' )/
+  %title
+    - if @title
+      #{@title} - Evolu
+    - else
+      Evolu
+  %link( rel="stylesheet" href="style.css" )/
+%body
+  = yield

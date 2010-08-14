@@ -1,0 +1,60 @@
+#!/usr/bin/env ruby
+# Compile HAML and SASS and copy all files to public/
+
+require 'pathname'
+require 'yaml'
+require 'rubygems'
+require 'haml'
+require 'sass'
+require 'compass'
+require 'maruku'
+
+ROOT    = Pathname.new(__FILE__).dirname.parent.realpath
+PROJECT = ROOT.parent
+CONTENT = ROOT.join('content')
+LAYOUT  = ROOT.join('layout')
+PUBLIC  = ROOT.join('public')
+
+def readme(path)
+  path = path[1..-1] + 'README.md'
+  Maruku.new(File.read(PROJECT.join(path))).to_html
+end
+
+def build
+  PUBLIC.rmtree if PUBLIC.exist?
+  PUBLIC.mkpath
+
+  layout = Haml::Engine.new(File.read(LAYOUT + 'layout.html.haml'))
+
+  Pathname.glob(CONTENT.join('**/*.haml').to_s) do |haml|
+    @page = haml.basename('.haml').to_s
+    file = PUBLIC + haml.relative_path_from(CONTENT).dirname + @page
+    file.dirname.mkpath
+    File.open(file, 'w') do |io|
+      io.write(layout.render(self) {
+        Haml::Engine.new(File.read(haml)).render(self)
+      })
+    end
+  end
+
+  Pathname.glob(LAYOUT.join('**/*.sass').to_s) do |sass|
+    content = File.read(sass)
+    css = PUBLIC + sass.relative_path_from(LAYOUT).dirname +
+          (sass.basename('.sass').to_s + '.css')
+    css.dirname.mkpath
+    Compass.configuration.environment = :production
+    File.open(css, 'w') do |io|
+      io.write Sass::Engine.new(content, Compass.sass_engine_options).render
+    end
+  end
+
+  Pathname.glob(LAYOUT.join('**/*').to_s, File::FNM_DOTMATCH) do |from|
+    next if from.directory?
+    next if '.sass' == from.extname or '.haml' == from.extname
+    to = PUBLIC + from.relative_path_from(LAYOUT)
+    to.dirname.mkpath
+    to.make_link(from)
+  end
+end
+
+build
