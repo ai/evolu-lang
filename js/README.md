@@ -10,5 +10,5 @@ on Evolu.
 
 ## License
 
-R18n is licensed under the GNU Lesser General Public License version 3.
+Evolu.js is licensed under the GNU Lesser General Public License version 3.
 See the LICENSE file or http://www.gnu.org/licenses/lgpl.html.

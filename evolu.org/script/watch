@@ -6,6 +6,6 @@
 cd `dirname $0`
 while true; do
     ./build
-    inotifywait -e MOVE_SELF,MODIFY,CLOSE_WRITE ../content/ ../layout
+    inotifywait -re MOVE_SELF,MODIFY,CLOSE_WRITE ../../
     sleep 1
 done

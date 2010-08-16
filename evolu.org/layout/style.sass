@@ -1,0 +1,91 @@
+*
+  margin: 0
+  padding: 0
+
+body
+  background: white url(hatching.png) repeat-x 0 0
+  color: black
+  margin: 0 0.5em 2em 0.5em
+  line-height: 1.8
+  font-family: Georgia, serif
+
+nav, article
+  display: block
+  width: 30em
+  max-width: 100%
+  margin: 0 auto
+
+nav
+  a
+    padding: 0.4em 0.7em 0.3em 0.7em
+    margin: 9px 1px 10px 0
+    font-family: "Times New Roman", serif
+    text-transform: uppercase
+    position: relative
+    text-decoration: none
+    background: white
+    color: black
+    float: left
+    &:last-child
+      margin-right: 0
+    &.open, &:hover, &:active
+      background: black
+      color: white
+      text-shadow: #ccc 0 0 1px
+    &:active
+      border: 3px solid black
+      outline: 3px solid white
+      margin: 6px -2px 0 -3px
+      z-index: 2
+    div
+      margin-right: 1px
+      position: absolute
+      left: 0
+      top: 100%
+      height: 7px
+      width: 100%
+      background: url(arrow.png) no-repeat 50% 100%
+
+article
+  clear: both
+
+h1, h2, h3
+  margin: 0.5em 0 0 0
+  font-weight: normal
+  font-family: Georgia, serif
+  text-shadow: #aaa 1px 1px 1px
+h1
+  margin-top: 0
+  font-size: 340%
+h2
+  font-size: 190%
+h3
+  font-size: 160%
+
+p, ul
+  margin-bottom: 1em
+p + ul
+  margin-top: -1em
+
+@media handheld, screen and (max-device-width: 481px), screen and (max-width: 30em)
+  nav a
+    margin-bottom: 2px
+    text-shadow: white 0 0 0
+    &:hover
+      background: white
+      color: black
+    &.open, &:active
+      background: black
+      color: white
+    div
+      display: none
+
+@media print
+  nav
+    display: none
+  body
+    background: none
+    margin: 0
+    width: auto
+  h1, h2, h3
+    text-shadow: white 0 0 0

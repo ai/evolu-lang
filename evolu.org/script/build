@@ -6,7 +6,6 @@ require 'yaml'
 require 'rubygems'
 require 'haml'
 require 'sass'
-require 'compass'
 require 'maruku'
 
 ROOT    = Pathname.new(__FILE__).dirname.parent.realpath
@@ -20,6 +19,15 @@ def readme(path)
   Maruku.new(File.read(PROJECT.join(path))).to_html
 end
 
+def menu(title, link)
+  options = ''
+  if link == @page
+    title += '<div></div>'
+    options = ' class="open"'
+  end
+  '<a href="' + link + '"' + options + '>' + title + '</a>'
+end
+
 def build
   PUBLIC.rmtree if PUBLIC.exist?
   PUBLIC.mkpath
@@ -31,9 +39,8 @@ def build
     file = PUBLIC + haml.relative_path_from(CONTENT).dirname + @page
     file.dirname.mkpath
     File.open(file, 'w') do |io|
-      io.write(layout.render(self) {
-        Haml::Engine.new(File.read(haml)).render(self)
-      })
+      content = Haml::Engine.new(File.read(haml)).render(self)
+      io.write(layout.render(self) { content })
     end
   end
 
@@ -42,9 +49,8 @@ def build
     css = PUBLIC + sass.relative_path_from(LAYOUT).dirname +
           (sass.basename('.sass').to_s + '.css')
     css.dirname.mkpath
-    Compass.configuration.environment = :production
     File.open(css, 'w') do |io|
-      io.write Sass::Engine.new(content, Compass.sass_engine_options).render
+      io.write Sass::Engine.new(content).render
     end
   end
 
