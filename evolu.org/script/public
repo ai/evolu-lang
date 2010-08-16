@@ -1,0 +1,38 @@
+#!/bin/sh
+# Build site, copy generated files to gh-pages branch and push it to GitHub.
+
+cd `dirname $0`
+
+if [ "`git status -s`" ]; then
+    echo "You have uncommitted changes:"
+    git status -s
+    exit 0
+fi
+
+./build
+cd ../..
+
+git checkout gh-pages > /dev/null 2>&1
+
+for file in `ls --ignore=evolu.org`; do
+    rm -R $file
+done
+
+for file in `ls evolu.org/public`; do
+    cp evolu.org/public/$file ./
+done
+
+rm -R evolu.org/
+
+if [ -z "`git status -s`" ]; then
+    echo "You haven't any new changes to update site"
+    git checkout master > /dev/null  2>&1
+    exit 0
+fi
+
+git status | grep deleted: | cut -f 2 -d : | xargs git rm
+git add .
+
+git commit -m "Update generated files from evolu.org/ in master branch"
+
+git push origin gh-pages && git checkout master > /dev/null 2>&1
