@@ -63,7 +63,8 @@ h1, h2, h3 {
   margin: 0.5em 0 0.3em 0;
   font-weight: normal;
   font-family: Georgia, serif;
-  line-height: 1.1; }
+  line-height: 1.1;
+  text-shadow: #cccccc 1px 1px 1px; }
 
 h1 {
   margin: 0 0 0.4em 0;
@@ -87,7 +88,7 @@ p + ul {
     position: absolute;
     margin: 15px 0 0.5em -0.5em; }
   header nav {
-    margin-left: 73px;
+    margin-left: 75px;
     float: left; }
   header a {
     margin-bottom: 0;
