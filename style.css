@@ -107,11 +107,14 @@ p + ul {
       display: none; } }
 
 @media print {
-  header, #logo {
-    display: none; }
-
   body {
     background: none;
+    margin: 0; }
+
+  header {
+    display: none; }
+
+  article {
     margin: 0;
     width: auto; }
 
