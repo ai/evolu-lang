@@ -14,7 +14,7 @@ cd ../..
 
 git checkout gh-pages > /dev/null 2>&1
 
-for file in `ls --ignore=evolu.org`; do
+for file in `ls --ignore=evolu.org --ignore=CNAME`; do
     rm -R $file
 done
 
