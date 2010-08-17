@@ -9,9 +9,11 @@
   /[if IE]
     %script( src="http://html5shiv.googlecode.com/svn/trunk/html5.js" )
 %body
-  %nav
-    = menu('Language', 'index.html')
-    = menu('JS interpretator', 'js.html')
-    %a( href="http://github.com/ai/evolu" ) Sources
-    %a( href="http://github.com/ai/evolu/issues" ) Issues
+  %header
+    #logo
+    %nav
+      = menu('Language', 'index.html')
+      = menu('JS interpretator', 'js.html')
+      %a( href="http://github.com/ai/evolu" ) Sources
+      %a( href="http://github.com/ai/evolu/issues" ) Issues
   = yield
