@@ -30,7 +30,9 @@ if [ -z "`git status -s`" ]; then
     exit 0
 fi
 
-git status | grep deleted: | cut -f 2 -d : | xargs git rm
+if [ "`git status | grep deleted:`" ]; then
+    git status | grep deleted: | cut -f 2 -d : | xargs git rm
+fi
 git add .
 
 git commit -m "Update generated files from evolu.org/ in master branch"
