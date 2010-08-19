@@ -1,29 +1,149 @@
 <!DOCTYPE html>
 <head>
-  <meta charset='UTF-8' />
-  <title>Evolu - language for genetic programming</title>
-  <meta content='evolu, genetic programming, genetics algorithm, programming language, evolution, javascript' name='keywords' />
-  <meta content='Evolu is a programming language to genetic programming (automatically generate programs by evolution)' name='description' />
-  <link href='style.css' rel='stylesheet' />
-  <link href='favicon.ico' rel='icon' type='image/x-icon' />
-  <meta content='width=device-width; initial-scale=1.0; maximum-scale=1.0' name='viewport' />
-  <!--[if IE]>
-    <script src='http://html5shiv.googlecode.com/svn/trunk/html5.js'></script>
-  <![endif]-->
+<meta charset='UTF-8' />
+<title>Evolu - language for genetic programming</title>
+<meta content='evolu, genetic programming, genetic algorithm, programming language, evolution, javascript' name='keywords' />
+<meta content='Evolu is a programming language to genetic programming (automatically generate programs by evolution)' name='description' />
+<link href='style.css' rel='stylesheet' />
+<link href='favicon.ico' rel='icon' type='image/x-icon' />
+<meta content='width=device-width; initial-scale=1.0; maximum-scale=1.0' name='viewport' />
+<!--[if IE]>
+<script src='http://html5shiv.googlecode.com/svn/trunk/html5.js'></script>
+<![endif]-->
+<script type='text/javascript'>
+  //<![CDATA[
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-12907923-1']);
+    _gaq.push(['_trackPageview']);
+    (function() {
+        var ga = document.createElement('script'); ga.async = true;
+        ga.src = ('https:' == document.location.protocol ?
+            'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(ga, s);
+    })();
+  //]]>
+</script>
 </head>
 <body>
-  <header>
-    <div id='logo'></div>
-    <nav>
-      <a href="index.html" class="open">Language<div></div></a>
-      <a href="js.html">JS interpretator</a>
-      <a href='http://github.com/ai/evolu'>Sources</a>
-      <a href='http://github.com/ai/evolu/issues'>Issues</a>
-    </nav>
-  </header>
-  <article>
-    <h1 id='evolu'>Evolu</h1>
-    
-    <p>Evolu is a programming language to automatically generate programs by evolution (genetic programming). It create to be readable for human (instead of artificial neural networks) and easy editable and mixable for genetics algorithm (instead of tree structure and modern production languages).</p>
-  </article>
+<header>
+<div id='logo'></div>
+<nav>
+<a href="index.html" class="open">Language<div></div></a>
+<a href="js.html"><abbr title="JavaScript">JS</abbr> interpreter</a>
+<a href='http://github.com/ai/evolu'>Sources</a>
+<a href='http://github.com/ai/evolu/issues'>Issues</a>
+</nav>
+</header>
+<article>
+<h1 id='evolu'>Evolu</h1>
+
+<p>Evolu is a programming language to automatically generate programs by evolution (genetic programming). It is created to be readable by human beings (instead of artificial neural networks) and easily editable and mixable for genetic algorithm (instead of tree structure and modern production languages).</p>
+
+<h2 id='how_it_works'>How It Works</h2>
+
+<p>A developer defines commands by Evolu to create a business specific language (or uses the standard commands pack) and defines tests (<em>fitness</em>), to determine what program he or she wants to create.</p>
+
+<p>In the next step he or she uses a generator, which uses a genetic algorithm, particle swarm optimization or other evolutionary algorithms. In the simplest case:</p>
+
+<ol>
+<li>Generator creates an array (<em>population</em>) with random bytes (<em>genes</em>).</li>
+
+<li>It adds random changes (<em>mutation</em>) to each byte stream in this array.</li>
+
+<li>It compiles each of these random byte streams by Evolu language and runs obtained programs with tests.</li>
+
+<li>Bad programs will be deleted and best programs will be copied to the population.</li>
+
+<li>Generator returns to step 2 until an obtained program passes all of the tests.</li>
+</ol>
+
+<h2 id='features'>Features</h2>
+
+<ul>
+<li>It is similar to usual programming languages with variables, commands, blocks and conditions.</li>
+
+<li>Simple and explicit code. If you change one byte of code, you will change one command or parameter in program. If you just join two half parts of two different programs, you will get algorithm with properties of both parts.</li>
+
+<li>Program is coded to a byte stream, so you can use a lot of libraries to mutate programs. Of course, you can use the string form for debug and research.</li>
+
+<li>You are able to extend standard commands and conditions for the purposes of your task.</li>
+
+<li>It has an interpreter in JavaScript, so you can create a distributed cluster from site visitors with a simple web page.</li>
+</ul>
+
+<h2 id='language_philosophy'>Language Philosophy</h2>
+
+<ul>
+<li><strong>Explicit code.</strong> To control mutation, we must know, that when we change one byte, the algorithm will change slightly. When we copy a part of one algorithm to another, we expect, that the second algorithm will get some properties from the first one.</li>
+
+<li><strong>Everything makes sense.</strong> A mutation doesn’t know about syntax and formats. Interpreter must try to get maximum sense, from any byte stream. For example, if a byte can code 2 values, we must read even bytes as first value and odd values as second. So any byte value makes sense, not just the first two.</li>
+
+<li><strong>Simple structures.</strong> We can’t demand on the mutation placing all conditions in the beginning of a block. A better way is to mark conditions and expect them in any place of a block.</li>
+</ul>
+
+<h2 id='description'>Description</h2>
+
+<h3 id='program'>Program</h3>
+
+<p>Each Evolu program starts with an <code>EVOLU:</code> prefix to check, that the file or stream contains a program.</p>
+
+<p>Like XML, Evolu is just a syntax format. So you need to have business-specific languages and mark, what language is used in this Evolu program. So, after the <code>EVOLU:</code> prefix, stream must contain language name and a colon.</p>
+
+<pre><code>&lt;program&gt; ::= &quot;EVOLU:&quot; &lt;language&gt; &quot;:&quot; &lt;rules&gt;</code></pre>
+
+<p>Language name is case insensitive and may contain any chars, except colon and space.</p>
+
+<p>The genetic algorithm shouldn’t change these prefixes, they should be used only to store and transfer Evolu programs.</p>
+
+<h3 id='rules'>Rules</h3>
+
+<p>An Evolu program is split to separated blocks, <em>rules</em>, by <em>separator</em>. The separator is a built-in command and may be coded in different bytes (depending on command count, see “Commands and Parameters” section below). But in any languages <code>0x00</code> byte is a separator.</p>
+
+<pre><code>&lt;rules&gt;     ::= ( &lt;rule&gt; &lt;separator&gt; )*
+&lt;separator&gt; ::= 0x00 | &lt;separator bytes in this language&gt;</code></pre>
+
+<h3 id='commands_and_parameters'>Commands and Parameters</h3>
+
+<p>A rule contains pairs of <em>commands</em> and an optional <em>parameter</em>. Command byte begins with <code>0</code> bit and command number is encoded by next 7 bits. Any other bytes (beginning with <code>1</code>) after command encode parameter number. For example, 2 bytes <code>1aaaaaaa</code> and <code>1bbbbbbb</code> encode parameter with <code>aaaaaaabbbbbbb</code> value.</p>
+
+<pre><code>&lt;rule&gt;      ::= ( &lt;command&gt; ( &lt;parameter&gt; )* )*
+&lt;command&gt;   ::=   0xxxxxxx
+&lt;parameter&gt; ::= ( 1xxxxxxx )*</code></pre>
+
+<p>There are 127 different commands number in one command byte, but language may have less commands. A mutation can generate any bytes and Evolu must try to decode any of them. So, commands are marked numbers in a circle: if language have 3 commands (<code>separator</code>, <code>a</code>, <code>b</code>), 0 will be encode <code>separator</code>, 1 – <code>a</code>, 2 – <code>b</code>, but 3 will encode <code>separator</code> again, 4 – <code>a</code>, etc.</p>
+
+<p>In language description commands may specify format of it’s parameter. Parameters can be unsigned integers (simple encoded by bits in parameter bytes) or list of values (encode in cycle, like commands).</p>
+
+<h3 id='conditions'>Conditions</h3>
+
+<p>There is special command type – <em>condition</em>. If all conditions in a rule are true, the rule’s commands will execute.</p>
+
+<p>If a rule doesn’t have any conditions it will run once at start as constructor.</p>
+
+<h3 id='standard_commands_pack'>Standard Commands Pack</h3>
+
+<p>You can create your own language with Evolu, but for common tasks Evolu has the standard commands pack to create Turing completeness languages.</p>
+
+<p>Conditions:</p>
+
+<ul>
+<li><code>if_signal</code> will be true, when program receives input signal (its name will be taken from parameter). If the rule contains several these conditions with different signals, all <code>if_signal</code> conditions will be true by any of these signals (because, program may receive only one signal at a moment).</li>
+
+<li><code>if_var_more_0</code> will be true if variable (its name will be taken from condition parameter) will be more, than zero.</li>
+</ul>
+
+<p>Commands:</p>
+
+<ul>
+<li><code>send_signal</code> will send output signal (its name will be taken from parameter).</li>
+
+<li><code>var_up</code> will increase variable from parameter.</li>
+
+<li><code>var_down</code> will decrease variable from parameter.</li>
+</ul>
+
+<p>The developer must define, what input and output signals will be in the language, but variables can be added dynamically by mutation.</p>
+</article>
+
 </body>
