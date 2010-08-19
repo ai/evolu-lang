@@ -11,7 +11,7 @@ body
 
 header, article
   display: block
-  width: 30em
+  width: 34em
   max-width: 100%
   margin: 0 auto
   position: relative
@@ -30,6 +30,7 @@ header
     padding: 0.7em
     margin: 9px 1px 10px 0
     font-family: "Times New Roman", serif
+    letter-spacing: 1px
     text-transform: uppercase
     position: relative
     text-decoration: none
@@ -60,7 +61,7 @@ article
   clear: both
 
 h1, h2, h3
-  margin: 0.5em 0 0.3em 0
+  margin: 1em 0 0.5em 0
   font-weight: normal
   font-family: Georgia, serif
   line-height: 1.1
@@ -69,14 +70,18 @@ h1
   margin: 0 0 0.4em 0
   padding-top: 0.3em
   font-size: 340%
+  span
+    color: #666
 h2
   font-size: 190%
 h3
   font-size: 160%
+abbr
+  border: none
 
-p, ul
+p, ul, ol, pre
   margin-bottom: 1em
-p + ul
+p + ul, p + ol
   margin-top: -1em
 
 @media handheld, screen and (max-device-width: 481px), screen and (max-width: 30em)
@@ -116,3 +121,5 @@ p + ul
     text-shadow: white 0 0 0
   h1
     margin-top: 0
+  ul, ol
+    margin-left: 1.5em

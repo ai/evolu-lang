@@ -14,6 +14,10 @@ CONTENT = ROOT.join('content')
 LAYOUT  = ROOT.join('layout')
 PUBLIC  = ROOT.join('public')
 
+def production?
+  'production' == ARGV.first
+end
+
 def readme(path)
   path = path[1..-1] + 'README.md'
   Maruku.new(File.read(PROJECT.join(path))).to_html
@@ -32,14 +36,15 @@ def build
   PUBLIC.rmtree if PUBLIC.exist?
   PUBLIC.mkpath
 
-  layout = Haml::Engine.new(File.read(LAYOUT + 'layout.html.haml'))
+  path = LAYOUT + 'layout.html.haml'
+  layout = Haml::Engine.new(File.read(path), :ugly => true)
 
   Pathname.glob(CONTENT.join('**/*.haml').to_s) do |haml|
     @page = haml.basename('.haml').to_s
     file = PUBLIC + haml.relative_path_from(CONTENT).dirname + @page
     file.dirname.mkpath
     File.open(file, 'w') do |io|
-      content = Haml::Engine.new(File.read(haml)).render(self)
+      content = Haml::Engine.new(File.read(haml), :ugly => true).render(self)
       io.write(layout.render(self) { content })
     end
   end

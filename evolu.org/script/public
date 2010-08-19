@@ -9,7 +9,7 @@ if [ "`git status -s`" ]; then
     exit 0
 fi
 
-./build
+./build production
 cd ../..
 
 git checkout gh-pages > /dev/null 2>&1
