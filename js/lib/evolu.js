@@ -638,99 +638,79 @@
     }
     
     /**
-     * Input/output signals to communicate code with outside.
+     * Allow program to get information from outside: add conditions to
+     * check input signals and method `signal(name)` to send input signal.
+     * 
+     * You must set supported signals for you task:
      *
      *   evolu.lang('LNG', function() {
-     *       this.add(evolu.standard.signals.input('tick', 'result'))
-     *       this.add(evolu.standard.signals.output('odd', 'even'))
+     *       this.add(evolu.standard.input('tick', 'result'))
+     *   })
+     *   code = evolu.compile('EVOLU:LNG:…')
+     *   code.init()
+     *   code.signal('tick').signal('result')
+     * 
+     * Method `signal` execute `run` once. So, if you want to execute all
+     * rules, which are enabled by commands in rule with signal condition,
+     * you must call `run` again.
+     * 
+     * If rule contain conditions for “A” and “B” signals, both conditions
+     * will be enabled on signal “A” OR “B” (because program can’t receive
+     * several signal at one moment).
+     */
+    evolu.standard.input = function() {
+        var signals = arguments
+        return function(lang) {
+            lang.condition('if_signal', {
+                params: signals,
+                init: function() {
+                    var rule = this.currentRule
+                    if (undefined == rule.signal_conditions) {
+                        rule.signal_conditions = 1
+                    } else {
+                        rule.signal_conditions += 1
+                    }
+                },
+                install: function() {
+                    this.signal = function(signal) {
+                        var rules = this.conditions('if_signal', signal)
+                        for (var i = 0; i < rules.length; i++)
+                            rules[i].on(rules[i].signal_conditions)
+                        this.run()
+                        for (var i = 0; i < rules.length; i++)
+                            rules[i].off(rules[i].signal_conditions)
+                        return this
+                    }
+                }
+            })
+        }
+    },
+    
+    /**
+     * Allow program to send information to outside: add command to send
+     * output signals and event `receive_signal` to catch it from you code.
+     * 
+     * You must set supported signals for you task:
+     *
+     *   evolu.lang('LNG', function() {
+     *       this.add(evolu.standard.output('odd', 'even'))
      *   })
      *   code = evolu.compile('EVOLU:LNG:…')
      *   code.listen('send_signal', function(signal) {
+     *       // Print “odd” or “even”.
      *       console.log('Count is ' + signal)
      *   })
-     *   code.init()
-     *   code.signal('tick').signal('tick').signal('tick')
-     *   code.signal('result') // => "Count is odd"
      */
-    evolu.standard.signals = {
-        
-        /**
-         * Allow program to get information from outside: add conditions to
-         * check input signals and method `signal(name)` to send input signal.
-         * 
-         * You must set supported signals for you task:
-         *
-         *   evolu.lang('LNG', function() {
-         *       this.add(evolu.standard.signals.input('tick', 'result'))
-         *   })
-         *   code = evolu.compile('EVOLU:LNG:…')
-         *   code.init()
-         *   code.signal('tick').signal('result')
-         * 
-         * Method `signal` execute `run` once. So, if you want to execute all
-         * rules, which are enabled by commands in rule with signal condition,
-         * you must call `run` again.
-         * 
-         * If rule contain conditions for “A” and “B” signals, both conditions
-         * will be enabled on signal “A” OR “B” (because program can’t receive
-         * several signal at one moment).
-         */
-        input: function() {
-            var signals = arguments
-            return function(lang) {
-                lang.condition('if_signal', {
-                    params: signals,
-                    init: function() {
-                        var rule = this.currentRule
-                        if (undefined == rule.signal_conditions) {
-                            rule.signal_conditions = 1
-                        } else {
-                            rule.signal_conditions += 1
-                        }
-                    },
-                    install: function() {
-                        this.signal = function(signal) {
-                            var rules = this.conditions('if_signal', signal)
-                            for (var i = 0; i < rules.length; i++)
-                                rules[i].on(rules[i].signal_conditions)
-                            this.run()
-                            for (var i = 0; i < rules.length; i++)
-                                rules[i].off(rules[i].signal_conditions)
-                            return this
-                        }
-                    }
-                })
-            }
-        },
-        
-        /**
-         * Allow program to send information to outside: add command to send
-         * output signals and event `receive_signal` to catch it from you code.
-         * 
-         * You must set supported signals for you task:
-         *
-         *   evolu.lang('LNG', function() {
-         *       this.add(evolu.standard.signals.output('odd', 'even'))
-         *   })
-         *   code = evolu.compile('EVOLU:LNG:…')
-         *   code.listen('send_signal', function(signal) {
-         *       // Print “odd” or “even”.
-         *       console.log('Count is ' + signal)
-         *   })
-         */
-        output: function() {
-            var signals = arguments
-            return function(lang) {
-                lang.command('send_signal', {
-                    params: signals,
-                    run: function(signal) {
-                        if (undefined == signal) return
-                        this.fire('receive_signal', [signal])
-                    }
-                })
-            }
+    evolu.standard.output = function() {
+        var signals = arguments
+        return function(lang) {
+            lang.command('send_signal', {
+                params: signals,
+                run: function(signal) {
+                    if (undefined == signal) return
+                    this.fire('receive_signal', [signal])
+                }
+            })
         }
-        
     }
-    
 })();

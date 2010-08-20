@@ -73,7 +73,7 @@ JSpec.describe('evolu.standard', function() {
     
     it('should add input signals', function() {
         var lang = evolu.lang('LNG', function() {
-            this.add(evolu.standard.signals.input('a', 'b'))
+            this.add(evolu.standard.input('a', 'b'))
         })
         expect(lang._list.length).to(be, 2)
       
@@ -100,7 +100,7 @@ JSpec.describe('evolu.standard', function() {
     
     it('should add output signals', function() {
         var lang = evolu.lang('LNG', function() {
-            this.add(evolu.standard.signals.output('a', 'b'))
+            this.add(evolu.standard.output('a', 'b'))
         })
         expect(lang._list.length).to(be, 2)
       
@@ -120,8 +120,8 @@ JSpec.describe('evolu.standard', function() {
     
     it('should convert bytes to signal names', function() {
         var lang = evolu.lang('LNG', function() {
-            this.add(evolu.standard.signals.input('in_a', 'in_b'))
-            this.add(evolu.standard.signals.output('out_a', 'out_b'))
+            this.add(evolu.standard.input('in_a', 'in_b'))
+            this.add(evolu.standard.output('out_a', 'out_b'))
         })
         code = lang.compile([1, 128, 1, 129, 1, 130,
                              2, 128, 2, 129, 2, 130])

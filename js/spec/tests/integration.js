@@ -2,8 +2,8 @@ JSpec.describe('evolu', function() {
     
     it('should calculate odd or even signals was be received', function() {
         evolu.lang('ODD-EVEN', function() {
-            this.add(evolu.standard.signals.input('tick', 'result'))
-            this.add(evolu.standard.signals.output('odd', 'even'))
+            this.add(evolu.standard.input('tick', 'result'))
+            this.add(evolu.standard.output('odd', 'even'))
             this.add(evolu.standard.variables)
         })
         
