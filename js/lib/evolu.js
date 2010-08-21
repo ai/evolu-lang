@@ -124,10 +124,10 @@
          * Add command `name` to language.
          * 
          * Command could has properties:
-         * * install: function, which will be run, when new `evolu.Code`.
+         * * install: function, which will be run after compile new program to
+         *            add methods and variables to it.
          * * init:    function(param), which will be run, when parser will read
          *            next rule with this command.
-         *            instance will be create by this language.
          * * run:     function(param), which will be run, when this rule with
          *            this command will be execute.
          * * params:  array of supported command parameters.

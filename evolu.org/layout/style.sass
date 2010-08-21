@@ -16,6 +16,13 @@ header, article
   margin: 0 auto
   position: relative
 
+a
+  text-decoration: none
+  color: black
+  border-bottom: 1px solid #999
+  &:hover
+    border-color: black
+
 header
   line-height: 1
   #logo
@@ -33,10 +40,10 @@ header
     letter-spacing: 1px
     text-transform: uppercase
     position: relative
-    text-decoration: none
     background: white
     color: black
     float: left
+    border: none
     &:last-child
       margin-right: 0
     &.open, &:hover, &:active

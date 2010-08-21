@@ -1,7 +1,11 @@
 # Evolu
 
 Evolu is a programming language to automatically generate programs by evolution
-(genetic programming). It is created to be readable by human beings (instead of
+(genetic programming). Generator (genetic algorithm, particle swarm optimization
+or other) will use Evolu to compile bytes with random mutations (gene) to
+program, run and test it.
+
+It is created to be readable by human beings (instead of
 artificial neural networks) and easily editable and mixable for genetic
 algorithm (instead of tree structure and modern production languages).
 
