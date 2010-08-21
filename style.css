@@ -16,6 +16,13 @@ header, article {
   margin: 0 auto;
   position: relative; }
 
+a {
+  text-decoration: none;
+  color: black;
+  border-bottom: 1px solid #999999; }
+  a:hover {
+    border-color: black; }
+
 header {
   line-height: 1; }
   header #logo {
@@ -33,10 +40,10 @@ header {
     letter-spacing: 1px;
     text-transform: uppercase;
     position: relative;
-    text-decoration: none;
     background: white;
     color: black;
-    float: left; }
+    float: left;
+    border: none; }
     header a:last-child {
       margin-right: 0; }
     header a.open, header a:hover, header a:active {

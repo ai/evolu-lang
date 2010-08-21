@@ -38,13 +38,86 @@
 <article>
 <h1 id='evolujs'>Evolu.<span>js</span></h1>
 
-<p>Evolu is a programming language to automatically generate programs by evolution (genetic programming). It is created to be readable by human beings (instead of artificial neural networks) and easily editable and mixable for genetic algorithm (instead of tree structure and modern production languages).</p>
+<p>Evolu.js is a JavaScript implementation of virtual machine to execute programs in Evolu programming language.</p>
 
-<p>Evolu.js is a JavaScript implementation of virtual machine to execute programs on Evolu.</p>
+<h2 id='how_to'>How To</h2>
 
+<p>For example, we will generate program (by genetic programming), which calculates <code>tick</code> signals and on <code>result</code> signal it sends whether an <code>even</code> or an <code>odd</code> tick count it received.</p>
+
+<h3 id='language'>Language</h3>
+
+<p>Like XML, Evolu is just a syntax format. So you need to define a language for your task using the <code>evolu.lang(name, initializer)</code> function. It receives a language name (to use it as a prefix in the source code for storing and transferring the program) and function (which adds the language commands to <code>this</code>), and returns a new language.</p>
+
+<p>For the common cases you can use the standard commands pack, and you only need to define the input/output signals.</p>
+
+<pre><code>var lang = evolu.lang(&#39;EVEN-ODD&#39;, function() {
+    this.add(evolu.standard.input(&#39;tick&#39;, &#39;result&#39;))
+    this.add(evolu.standard.output(&#39;even&#39;, &#39;odd&#39;))
+    lang.add(evolu.standard.variables)
+})</code></pre>
+
+<h3 id='population'>Population</h3>
+
+<p>Get any genetic algorithm library or write it by yourself. Use a byte array (array of integers from <code>0</code> to <code>255</code>, for example <code>[0, 255, 13, 68, 145]</code>) as genes.</p>
+
+<pre><code>var population = []
+// Add 100 genes to the first population
+for (var i = 0; i &lt; 100; i++) {
+    var gene = []
+    // Each gene will have random length
+    while (Math.random &lt; 0.9) {
+        // Add a random byte to the current gene
+        gene.push(Math.round(255 * Math.random()))
+    }
+}</code></pre>
+
+<h3 id='mutation'>Mutation</h3>
+
+<p><em>Note that the integers in an array must be from <code>0</code> to <code>255</code>.</em></p>
+
+<p>In the genetic algorithm you can use any types of mutation for a byte stream (a lot of libraries contain them). You can add, change, delete and move bytes in the array.</p>
+
+<p>You can use crossover to mix arrays or just move a part of bytes from one array to another (like horizontal gene transfer).</p>
+
+<h3 id='selection'>Selection</h3>
+
+<p>To calculate fitness for each gene in the population, you need to compile each byte array:</p>
+
+<pre><code>var program = lang.compile(population[i])</code></pre>
+
+<p>Send the data to the program and check its output data to calculate fitness. It’s like automatic unit testing, but your test must return a score, not just a pass/fail result.</p>
+
+<p>If you use the standard commands pack, you can use the <code>receive_signal</code> event to listen output signals and the <code>signal</code> function to send input signals:</p>
+
+<pre><code>output = []
+program.listen(&#39;receive_signal&#39;, function(signal) {
+    output.push(signal)
+})
+
+program.signal(&#39;tick&#39;).signal(&#39;tick&#39;).signal(&#39;result&#39;)
+// Some hypothetical API
+check(output).to_contain(&#39;even&#39;)
+
+output = []
+program.signal(&#39;tick&#39;).signal(&#39;result&#39;)
+check(output).to_contain(&#39;odd&#39;)</code></pre>
+
+<h3 id='saving'>Saving</h3>
+
+<p>When you generate a program for your demands, you can save it to a disk or send to a server:</p>
+
+<pre><code>var source = bestProgram.toSource()</code></pre>
+
+<p>Source is a string with <code>EVOLU:</code> and a language name in prefix. For example, <code>&quot;EVOLU:EVEN-ODD:\x04\x80\x00\x01\x80\x03\x80\x05…&quot;</code>.</p>
+
+<p>Use <code>evolu.compile(string)</code> to automatically find a language (using the source prefix) and compile the bytes into a program:</p>
+
+<pre><code>bestProgram == evolu.compile(bestProgram.toSource())</code></pre>
+
+<h2 id='license'>
 <h2 id='license'>License</h2>
 
-<p>Evolu.js is licensed under the GNU Lesser General Public License version 3. See the LICENSE file or http://www.gnu.org/licenses/lgpl.html.</p>
+<p>Evolu.js is licensed under the <a href='http://www.gnu.org/licenses/lgpl.html'>GNU Lesser General Public License version 3</a>.</p>
 </article>
 
 </body>
