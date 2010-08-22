@@ -109,7 +109,7 @@
 
 <p>A rule contains pairs of <em>commands</em> and an optional <em>parameter</em>. Command byte begins with <code>0</code> bit and command number is encoded by next 7 bits. Any other bytes (beginning with <code>1</code>) after command encode parameter number. For example, 2 bytes <code>1aaaaaaa</code> and <code>1bbbbbbb</code> encode parameter with <code>aaaaaaabbbbbbb</code> value.</p>
 
-<pre><code>&lt;rule&gt;      ::= ( &lt;command&gt; ( &lt;parameter&gt; )* )*
+<pre><code>&lt;rule&gt;      ::= ( &lt;command&gt; ( &lt;parameter&gt; )? )*
 &lt;command&gt;   ::=   0xxxxxxx
 &lt;parameter&gt; ::= ( 1xxxxxxx )*</code></pre>
 

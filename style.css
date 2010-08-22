@@ -117,7 +117,10 @@ p + ul, p + ol {
       outline: none;
       margin: 9px 1px 0 0; }
     header a div {
-      display: none; } }
+      display: none; }
+
+  ul, ol {
+    margin-left: 1.5em; } }
 
 @media print {
   body {
