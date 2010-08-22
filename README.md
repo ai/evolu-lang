@@ -91,7 +91,7 @@ begins with `0` bit and command number is encoded by next 7 bits. Any other
 bytes (beginning with `1`) after command encode parameter number. For example,
 2 bytes `1aaaaaaa` and `1bbbbbbb` encode parameter with `aaaaaaabbbbbbb` value.
 
-    <rule>      ::= ( <command> ( <parameter> )* )*
+    <rule>      ::= ( <command> ( <parameter> )? )*
     <command>   ::=   0xxxxxxx
     <parameter> ::= ( 1xxxxxxx )*
 
