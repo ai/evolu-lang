@@ -1,9 +1,9 @@
-JSpec.describe('evolu.lang.standard', function() {
+describe('evolu.lang.standard', function() {
     it('should add variables', function() {
         var lang = evolu.lang.add('LNG', function() {
             this.add(evolu.lang.standard.variables)
         })
-        expect(lang._list.length).to(be, 4)
+        expect(lang._list.length).toEqual(4)
         
         var code = new evolu.lang.Code(lang)
         code.rule(['var_up',        2],
@@ -15,7 +15,7 @@ JSpec.describe('evolu.lang.standard', function() {
                   ['var_up',        1],
                   ['var_up',        1])
         
-        expect(code._variables).to(eql, { 1: 0, 2: 0 })
+        expect(code._variables).toEqual({ 1: 0, 2: 0 })
         
         evolu.lang.Rule.prototype._originalRun = evolu.lang.Rule.prototype.run
         var runned = ''
@@ -25,18 +25,18 @@ JSpec.describe('evolu.lang.standard', function() {
         }
         
         code.init()
-        expect(code._variables).to(eql, { 1: 0, 2: 1 })
+        expect(code._variables).toEqual({ 1: 0, 2: 1 })
         code.run()
-        expect(code._variables).to(eql, { 1: 2, 2: 0 })
+        expect(code._variables).toEqual({ 1: 2, 2: 0 })
         code.run()
-        expect(code._variables).to(eql, { 1: 1, 2: 0 })
+        expect(code._variables).toEqual({ 1: 1, 2: 0 })
         code.run()
-        expect(code._variables).to(eql, { 1: 0, 2: 0 })
+        expect(code._variables).toEqual({ 1: 0, 2: 0 })
         code.run()
-        expect(code._variables).to(eql, { 1: 0, 2: 0 })
+        expect(code._variables).toEqual({ 1: 0, 2: 0 })
         code.run()
         
-        expect(runned).to(be, '0211')
+        expect(runned).toEqual('0211')
         
         evolu.lang.Rule.prototype.run = evolu.lang.Rule.prototype._originalRun
     })
@@ -55,7 +55,7 @@ JSpec.describe('evolu.lang.standard', function() {
         
         code.init()
         
-        expect(changes).to(eql, [[2, 1, 1], [1, -1, -1]])
+        expect(changes).toEqual([[2, 1, 1], [1, -1, -1]])
     })
     
     it('should allow add variables command', function() {
@@ -68,14 +68,14 @@ JSpec.describe('evolu.lang.standard', function() {
             this.add(evolu.lang.standard.variables.decrease)
         })
         
-        expect(pack._list.length).to(eql, separated._list.length)
+        expect(pack._list.length).toEqual(separated._list.length)
     })
     
     it('should add input signals', function() {
         var lang = evolu.lang.add('LNG', function() {
             this.add(evolu.lang.standard.input('a', 'b'))
         })
-        expect(lang._list.length).to(be, 2)
+        expect(lang._list.length).toEqual(2)
       
         var code = new evolu.lang.Code(lang)
         code.rule(['if_signal', 'a'])
@@ -93,7 +93,7 @@ JSpec.describe('evolu.lang.standard', function() {
         code.signal('b')
         code.run()
         
-        expect(runned).to(be, '0112')
+        expect(runned).toEqual('0112')
         
         evolu.lang.Rule.prototype.run = evolu.lang.Rule.prototype._originalRun
     })
@@ -102,7 +102,7 @@ JSpec.describe('evolu.lang.standard', function() {
         var lang = evolu.lang.add('LNG', function() {
             this.add(evolu.lang.standard.output('a', 'b'))
         })
-        expect(lang._list.length).to(be, 2)
+        expect(lang._list.length).toEqual(2)
       
         var code = new evolu.lang.Code(lang)
         code.rule(['send_signal', 'a'],
@@ -115,7 +115,7 @@ JSpec.describe('evolu.lang.standard', function() {
         })
         code.init()
         
-        expect(output).to(be, 'aab')
+        expect(output).toEqual('aab')
     })
     
     it('should convert bytes to signal names', function() {
@@ -127,11 +127,11 @@ JSpec.describe('evolu.lang.standard', function() {
                              2, 128, 2, 129, 2, 130])
         rule = code.rules[0]
         
-        expect(rule.lines[0].param).to(be, 'in_a')
-        expect(rule.lines[1].param).to(be, 'in_b')
-        expect(rule.lines[2].param).to(be, 'in_a')
-        expect(rule.lines[3].param).to(be, 'out_a')
-        expect(rule.lines[4].param).to(be, 'out_b')
-        expect(rule.lines[5].param).to(be, 'out_a')
+        expect(rule.lines[0].param).toEqual('in_a')
+        expect(rule.lines[1].param).toEqual('in_b')
+        expect(rule.lines[2].param).toEqual('in_a')
+        expect(rule.lines[3].param).toEqual('out_a')
+        expect(rule.lines[4].param).toEqual('out_b')
+        expect(rule.lines[5].param).toEqual('out_a')
     })
 })

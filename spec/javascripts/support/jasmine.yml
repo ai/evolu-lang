@@ -1,0 +1,13 @@
+src_files:
+  - evolu-lang.js
+
+spec_files:
+  - **/*[sS]pec.js
+
+helpers:
+
+stylesheets:
+
+src_dir: lib
+
+spec_dir: spec

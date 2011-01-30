@@ -1,27 +1,27 @@
-JSpec.describe('evolu.lang.Language', function() {
+describe('evolu.lang.Language', function() {
     it('should create new language', function() {
         evolu.lang._languages = {}
-        expect(evolu.lang.get('LNG')).to(be_undefined)
+        expect(evolu.lang.get('LNG')).not.toBeDefined()
     
         var lang = evolu.lang.add('LNG', function() { this.a = 1 })
 
-        expect(evolu.lang.get('LNG')).to(be, lang)
-        expect(lang).to(be_an_instance_of, evolu.lang.Language)
-        expect(lang.name).to(be, 'LNG')
-        expect(lang.a).to(be, 1)
+        expect(evolu.lang.get('LNG')).toBe(lang)
+        expect(lang instanceof evolu.lang.Language).toBeTruthy()
+        expect(lang.name).toEqual('LNG')
+        expect(lang.a).toEqual(1)
     })
     
     it('should ignore case in language name', function() {
         evolu.lang.add('LNG', function() { this.a = 1 })
-        expect(evolu.lang.get('lng')).to(be, evolu.lang.get('LNG'))
+        expect(evolu.lang.get('lng')).toBe(evolu.lang.get('LNG'))
     })
     
     it('should recreate language', function() {
         evolu.lang.add('LNG', function() { this.a = 1 })
         evolu.lang.add('lng', function() { this.b = 2 })
         
-        expect(evolu.lang.get('LNG')).not_to(have_property, 'a')
-        expect(evolu.lang.get('LNG')).to(have_property, 'b', 2)
+        expect(evolu.lang.get('LNG').a).not.toBeDefined()
+        expect(evolu.lang.get('LNG').b).toEqual(2)
     })
     
     it('should add commands', function() {
@@ -32,20 +32,20 @@ JSpec.describe('evolu.lang.Language', function() {
                  command('b', { b: 2, position: 2 })
         })
         
-        expect(lang.commands).to(eql, {
+        expect(lang.commands).toEqual({
             separator: lang._separator,
             a:         { name: 'a', run: func },
             b:         { name: 'b', b: 2 },
             c:         { name: 'c', c: 3 }
         })
-        expect(lang._list).to(eql, [lang._separator,
+        expect(lang._list).toEqual([lang._separator,
                                     { name: 'a', run: func },
                                     { name: 'b', b: 2 },
                                     { name: 'c', c: 3 }])
     
         var another = evolu.lang.add('ANZ', function() { })
-        expect(another.commands).to(eql, { separator: another._separator })
-        expect(another._list).to(eql, [ another._separator ])
+        expect(another.commands).toEqual({ separator: another._separator })
+        expect(another._list).toEqual([ another._separator ])
     })
     
     it('should add condition', function() {
@@ -55,7 +55,7 @@ JSpec.describe('evolu.lang.Language', function() {
                  condition('if_a', { a: 1, position: 1 })
         })
         
-        expect(lang._list).to(eql, [
+        expect(lang._list).toEqual([
             lang._separator,
             { name: 'if_a', a: 1, condition: true, init: lang._initCondition },
             { name: 'if_b', b: 2, condition: true, init: lang._initCondition }
@@ -67,16 +67,18 @@ JSpec.describe('evolu.lang.Language', function() {
         
         expect(function() {
             evolu.lang.compile('NO PROGRAM')
-        }).to(throw_error, /isn't Evolu program/)
+        }).toThrow("It isn't Evolu program, because it hasn't EVOLU mark " +
+                   "at beginning.")
         
         expect(function() {
             evolu.lang.compile('EVOLU:LNG:abc')
-        }).to(throw_error, 'Unknown Evolu language `LNG`')
+        }).toThrow('Unknown Evolu language `LNG`')
         
         var lang = evolu.lang.add('LNG', function() { })
-        stub(lang, 'compile')
-        expect(lang).to(receive, 'compile').with_args([97, 98, 99])
+        
+        spyOn(lang, 'compile')
         evolu.lang.compile('EVOLU:LNG:abc')
+        expect(lang.compile).toHaveBeenCalledWith([97, 98, 99])
     })
     
     it('should compile bytes to rules', function() {
@@ -87,10 +89,10 @@ JSpec.describe('evolu.lang.Language', function() {
         
         var code = lang.compile([128, 5, 0, 1, 128, 131, 2, 130, 128])
         
-        expect(code).to(be_an_instance_of, evolu.lang.Code)
-        expect(code).to(have_property, 'language', lang)
+        expect(code instanceof evolu.lang.Code).toBeTruthy()
+        expect(code.language).toEqual(lang)
         
-        expect(code.rules).to(eql, [
+        expect(code.rules).toEqual([
             {
                 id: 0,
                 lines: [{ command: lang.commands.b }],
@@ -130,8 +132,8 @@ JSpec.describe('evolu.lang.Language', function() {
         var code = new evolu.lang.Code(lang)
         code.rule('a', 'a')
         
-        expect(result).to(be, '1')
-        expect(code).to(have_property, 'a', 1)
+        expect(result).toEqual('1')
+        expect(code.a).toEqual(1)
     })
     
     it('should call initializers on compiling', function() {
@@ -150,14 +152,15 @@ JSpec.describe('evolu.lang.Language', function() {
                  })
         })
         
-        expect(lang.commands.a).to(receive, 'init').with_args('one')
+        spyOn(lang.commands.a, 'init')
         
         var code = lang.compile([1, 128, 2])
         
-        expect(bCalls).to(be, 1)
-        expect(currentCode).to(be, code)
-        expect(currentRule).to(be, code.rules[0])
-        expect(currentLine).to(be, code.rules[0].lines[1])
+        expect(lang.commands.a.init).toHaveBeenCalledWith('one')
+        expect(bCalls).toEqual(1)
+        expect(currentCode).toBe(code)
+        expect(currentRule).toBe(code.rules[0])
+        expect(currentLine).toBe(code.rules[0].lines[1])
     })
     
     it('should add package changes', function() {
@@ -165,7 +168,7 @@ JSpec.describe('evolu.lang.Language', function() {
         var lang = evolu.lang.add('LNG', function() {
             result = this.add(function(lng) { lng.one = 1 })
         })
-        expect(lang).to(have_property, 'one', 1)
-        expect(result).to(be, lang)
+        expect(lang.one).toEqual(1)
+        expect(result).toEqual(lang)
     })
 })

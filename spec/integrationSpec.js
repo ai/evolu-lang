@@ -1,4 +1,4 @@
-JSpec.describe('evolu.lang', function() {
+describe('evolu.lang', function() {
     
     it('should calculate odd or even signals was be received', function() {
         evolu.lang.add('ODD-EVEN', function() {
@@ -42,13 +42,13 @@ JSpec.describe('evolu.lang', function() {
         
         code.init()
         code.signal('result')
-        expect(result).to(be, 'even ')
+        expect(result).toEqual('even ')
         
         code.signal('tick').signal('tick').signal('tick').signal('result')
-        expect(result).to(be, 'even odd ')
+        expect(result).toEqual('even odd ')
         
         code.signal('tick').signal('result')
-        expect(result).to(be, 'even odd even ')
+        expect(result).toEqual('even odd even ')
     })
     
 })

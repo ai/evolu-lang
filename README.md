@@ -229,6 +229,23 @@ prefix) and compile the bytes into a program:
 
     bestProgram == evolu.lang.compile(bestProgram.toSource())
 
+## Testing
+
+1. Install Rake (Ruby make) and RubyGems (Ruby package manager).
+   For example, on Ubuntu:
+   
+       sudo apt-get install rake rubygems
+
+2. Install `jasmin` gem:
+
+       gem install jasmin
+
+3. Run test server:
+
+       rake jamsin
+
+4. Open <http://localhost:8888>.
+
 ## License
 
 Evolu Lang is licensed under the GNU Lesser General Public License version 3.
