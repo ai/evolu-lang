@@ -17,7 +17,9 @@
 
 ;(function() {
     
-    evolu = {
+    if ('undefined' == typeof(evolu)) evolu = { }
+    
+    evolu.lang = {
         
         version: '0.1',
         
@@ -25,37 +27,44 @@
         _languages: { },
         
         /**
-         * Return Evolu language with `name`. If you set `initializer`, it will
-         * create/recreate language: create new `evolu.Language` instance and
-         * call `initializer` on it. For unknown language `name` it will return
-         * `undefined`.
+         * Create/recreate Evolu language with `name`: create new
+         * `evolu.lang.Language` instance and call `initializer` on it and put
+         * to available languages list.
          * 
-         *   evolu.lang('LNG', function() {
+         * Use `evolu.lang.compile` to compile programs by your language or use
+         * `evolu.lang.get` to get language object.
+         * 
+         *   evolu.lang.add('LNG', function() {
          *       this.condition('if_receive_signal')
          *       this.command('send_signal', function() { … })
          *   })
-         *   
-         *   var lang = evolu.lang('LNG')
          */
-        lang: function(name, initializer) {
+        add: function(name, initializer) {
             var lower = name.toLowerCase()
-            if (initializer) {
-                var lang = new this.Language(name)
-                initializer.call(lang)
-                this._languages[lower] = lang
-                return lang
-            } else {
-                return this._languages[lower]
-            }
+            var lang = new this.Language(name)
+            initializer.call(lang)
+            this._languages[lower] = lang
+            return lang
         },
         
         /**
-         * Compile Evolu program to `evolu.Code` object. `program` must be a
-         * string, started by “EVOLU:lang:”, where “lang” is a language name.
+         * Return Evolu language with `name`, which was be added by
+         * `evolu.lang.add(name, initializer)`.
          * 
-         *   evolu.lang('LNG', function() { … })
+         * var lang = evolu.lang.get('LNG')
+         */
+        get: function(name) {
+            var lower = name.toLowerCase()
+            return this._languages[lower]
+        },
+        
+        /**
+         * Compile Evolu program to `evolu.lang.Code` object. `program` must be
+         * a string, started by “EVOLU:lang:”, where “lang” is a language name.
+         * 
+         *   evolu.lang.add('LNG', function() { … })
          *   
-         *   var code = evolu.compile('EVOLU:LNG:123')
+         *   var code = evolu.lang.compile('EVOLU:LNG:123')
          */
         compile: function(program) {
             var blocks = program.split(':', 3)
@@ -63,7 +72,7 @@
                 throw "It isn't Evolu program, because it hasn't EVOLU " +
                       "mark at beginning."
             
-            var lang = this.lang(blocks[1])
+            var lang = this.get(blocks[1])
             if (!lang) throw 'Unknown Evolu language `' + blocks[1] + '`'
             
             var bytes = [], string = blocks[2]
@@ -76,21 +85,21 @@
     }
     
     /**
-     * Evolu language.
+     * Sublanguage of Evolu Lang.
      * 
-     * As XML, Evolu is a just syntax format. You can set your own commands and
-     * condition based on your task.
+     * As XML, Evolu Lang is a just syntax format. You can set your own commands
+     * and condition based on your task.
      * 
-     * For common tasks Evolu has Turing completeness standard commands pack
-     * with variables (increase, decrease and check for zero) and input/output
-     * signals. See `evolu.standard` object.
+     * For common tasks Evolu Lang has Turing completeness standard commands
+     * pack with variables (increase, decrease and check for zero) and
+     * input/output signals. See `evolu.lang.standard` object.
      */
-    evolu.Language = function(name) {
+    evolu.lang.Language = function(name) {
         this.name = name
         this._list = [this._separator]
         this.commands = { separator: this._separator }
     }
-    evolu.Language.prototype = {
+    evolu.lang.Language.prototype = {
         
         /** Language name. */
         name: '',
@@ -113,7 +122,7 @@
          *       lang.command('send_signal', { … })
          *   }
          *   
-         *   evolu.lang('LNG', function() { this.add(send_signal) })
+         *   evolu.lang.add('LNG', function() { this.add(send_signal) })
          */
         add: function(package) {
             package(this)
@@ -132,7 +141,7 @@
          *            this command will be execute.
          * * params:  array of supported command parameters.
          * 
-         * In call functions `this` will be current `evolu.Code` instance.
+         * In call functions `this` will be current `evolu.lang.Code` instance.
          * In `run` and `init` functions you can get current rule and current
          * rule line by `this.currentRule` and `this.currentLine` properties.
          * 
@@ -197,17 +206,17 @@
         
         /**
          * Compile array of `bytes` number of this language commands and
-         * parameters to `evolu.Code` object.
+         * parameters to `evolu.lang.Code` object.
          * 
-         * It is a bit faster, than `evolu.compile`, so it’s useful in
-         * genetics programming cycle (or in another case, when you already know
+         * It is a bit faster, than `evolu.lang.compile`, so it’s useful in
+         * genetic programming cycle (or in another case, when you already know
          * language and work with array of numbers).
          * 
          *   var bytes = mutate(bestCode.bytes)
          *   var newCode = lang.compile(bytes)
          */
         compile: function(bytes) {
-            var code = new evolu.Code(this)
+            var code = new evolu.lang.Code(this)
             var count = this._list.length
             
             code.bytes = bytes
@@ -261,7 +270,7 @@
     }
     
     /** Program on Evolu language. */
-    evolu.Code = function(language) {
+    evolu.lang.Code = function(language) {
         this.language = language
         this.rules = []
         this._initializers = []
@@ -274,7 +283,7 @@
         for (name in commands)
             if (commands[name].install) commands[name].install.call(this)
     }
-    evolu.Code.prototype = {
+    evolu.lang.Code.prototype = {
         
         /** Code language object. */
         language: undefined,
@@ -452,10 +461,10 @@
         },
         
         /**
-         * Return original string representation of program bytes with Evolu and
-         * language marks at beginning.
+         * Return original string representation of program bytes with
+         * Evolu Lang and language marks at beginning.
          * 
-         *   code = evolu.compile('EVOLU:LNG:123')
+         *   code = evolu.lang.compile('EVOLU:LNG:123')
          *   code.toSource() // => "EVOLU:LNG:123"
          */
         toSource: function() {
@@ -465,7 +474,7 @@
         
         /** Add new rule with array `lines` with `[command, param]`. */
         _add: function(lines) {
-            var rule = new evolu.Rule(this, lines)
+            var rule = new evolu.lang.Rule(this, lines)
             this.rules.push(rule)
             
             var command, initializer = true
@@ -501,14 +510,14 @@
     }
     
     /** Separated part of code’s commands. */
-    evolu.Rule = function(code, lines) {
+    evolu.lang.Rule = function(code, lines) {
         this.code = code
         this.id = code.rules.length
         this.lines = lines
     }
-    evolu.Rule.prototype = {
+    evolu.lang.Rule.prototype = {
         
-        /** Rule owner instance of `evolu.Code`. */
+        /** Rule owner instance of `evolu.lang.Code`. */
         code: undefined,
         
         /** Array of rule’s lines of commands and params. */
@@ -556,14 +565,16 @@
         
     }
     
-    /** Evolu standard command pack. */
-    evolu.standard = { }
+    /** Standard command pack for Evolu Lang. */
+    evolu.lang.standard = { }
     
     /**
      * Add commands to increase/decrease variables and condition, that variable
      * is more than zero.
      * 
-     *   lang.add(evolu.standard.variables)
+     *   evolu.lang.add('LNG', function() {
+     *       lang.add(evolu.lang.standard.variables)
+     *   })
      * 
      * On changing variable, event `var_changed` will be send with variable
      * name, new variable value and change value.
@@ -573,25 +584,25 @@
      *                   ' from ' + (value + diff) + ' to ' + value)
      *   })
      */
-    evolu.standard.variables = function(lang) {
-        lang.add(evolu.standard.variables.moreZero)
-        lang.add(evolu.standard.variables.increase)
-        lang.add(evolu.standard.variables.decrease)
+    evolu.lang.standard.variables = function(lang) {
+        lang.add(evolu.lang.standard.variables.moreZero)
+        lang.add(evolu.lang.standard.variables.increase)
+        lang.add(evolu.lang.standard.variables.decrease)
     }
     
     /** Create hash with variables. */
-    evolu.standard.variables._install = function() {
+    evolu.lang.standard.variables._install = function() {
         this._variables = { }
     }
     
     /** Initialize variable to zero. */
-    evolu.standard.variables._init = function(variable) {
+    evolu.lang.standard.variables._init = function(variable) {
         if (undefined != variable)
             this._variables[variable] = 0
     }
     
     /** Condition, that variable is more, that zero. */
-    evolu.standard.variables.moreZero = function(lang) {
+    evolu.lang.standard.variables.moreZero = function(lang) {
         lang.condition('if_var_more_0', {
             install: function() {
                 this.listen('var_changed', function(variable, value, diff) {
@@ -606,10 +617,10 @@
     }
     
     /** Command to increase variable, which number will be in line parameter. */
-    evolu.standard.variables.increase = function(lang) {
+    evolu.lang.standard.variables.increase = function(lang) {
         lang.command('var_up', {
-            install: evolu.standard.variables._install,
-            init: evolu.standard.variables._init,
+            install: evolu.lang.standard.variables._install,
+            init: evolu.lang.standard.variables._init,
             run: function(variable) {
                 if (undefined == variable) return
                 
@@ -622,10 +633,10 @@
     }
     
     /** Command to decrease variable, which number will be in line parameter. */
-    evolu.standard.variables.decrease = function(lang) {
+    evolu.lang.standard.variables.decrease = function(lang) {
         lang.command('var_down', {
-            install: evolu.standard.variables._install,
-            init: evolu.standard.variables._init,
+            install: evolu.lang.standard.variables._install,
+            init: evolu.lang.standard.variables._init,
             run: function(variable) {
                 if (undefined == variable) return
                 
@@ -643,10 +654,10 @@
      * 
      * You must set supported signals for you task:
      *
-     *   evolu.lang('LNG', function() {
-     *       this.add(evolu.standard.input('tick', 'result'))
+     *   evolu.lang.add('LNG', function() {
+     *       this.add(evolu.lang.standard.input('tick', 'result'))
      *   })
-     *   code = evolu.compile('EVOLU:LNG:…')
+     *   code = evolu.lang.compile('EVOLU:LNG:…')
      *   code.init()
      *   code.signal('tick').signal('result')
      * 
@@ -658,7 +669,7 @@
      * will be enabled on signal “A” OR “B” (because program can’t receive
      * several signal at one moment).
      */
-    evolu.standard.input = function() {
+    evolu.lang.standard.input = function() {
         var signals = arguments
         return function(lang) {
             lang.condition('if_signal', {
@@ -692,16 +703,16 @@
      * 
      * You must set supported signals for you task:
      *
-     *   evolu.lang('LNG', function() {
-     *       this.add(evolu.standard.output('odd', 'even'))
+     *   evolu.lang.add('LNG', function() {
+     *       this.add(evolu.lang.standard.output('odd', 'even'))
      *   })
-     *   code = evolu.compile('EVOLU:LNG:…')
+     *   code = evolu.lang.compile('EVOLU:LNG:…')
      *   code.listen('send_signal', function(signal) {
      *       // Print “odd” or “even”.
      *       console.log('Count is ' + signal)
      *   })
      */
-    evolu.standard.output = function() {
+    evolu.lang.standard.output = function() {
         var signals = arguments
         return function(lang) {
             lang.command('send_signal', {

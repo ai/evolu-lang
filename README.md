@@ -1,9 +1,9 @@
-# Evolu
+# Evolu Lang
 
-Evolu is a programming language to automatically generate programs by evolution
-(genetic programming). Generator (genetic algorithm, particle swarm optimization
-or other) will use Evolu to compile bytes with random mutations (gene) to
-program, run and test it.
+Evolu Lang is a programming language to automatically generate programs by
+evolution (genetic programming). Generator (genetic algorithm, particle swarm
+optimization or other) will use Evolu Lang to compile bytes with random
+mutations (gene) to program, run and test it.
 
 It is created to be readable by human beings (instead of
 artificial neural networks) and easily editable and mixable for genetic
@@ -11,8 +11,8 @@ algorithm (instead of tree structure and modern production languages).
 
 ## How It Works
 
-A developer defines commands by Evolu to create a business specific language
-(or uses the standard commands pack) and defines tests (*fitness*),
+A developer defines commands by Evolu Lang to create a business specific
+language (or uses the standard commands pack) and defines tests (*fitness*),
 to determine what program he or she wants to create.
 
 In the next step he or she uses a generator, which uses a genetic algorithm,
@@ -20,7 +20,7 @@ particle swarm optimization or other evolutionary algorithms.
 In the simplest case:
 1. Generator creates an array (*population*) with random bytes (*genes*).
 2. It adds random changes (*mutation*) to each byte stream in this array.
-3. It compiles each of these random byte streams by Evolu language and runs
+3. It compiles each of these random byte streams by Evolu Lang and runs
    obtained programs with tests.
 4. Bad programs will be deleted and best programs will be copied to the
    population.
@@ -62,9 +62,10 @@ In the simplest case:
 Each Evolu program starts with an `EVOLU:` prefix to check, that the file or
 stream contains a program.
 
-Like XML, Evolu is just a syntax format. So you need to have business-specific
-languages and mark, what language is used in this Evolu program. So, after
-the `EVOLU:` prefix, stream must contain language name and a colon.
+Like XML, Evolu Lang is just a syntax format. So you need to have
+business-specific languages and mark, what language is used in this Evolu
+program. So, after the `EVOLU:` prefix, stream must contain language name and a
+colon.
 
     <program> ::= "EVOLU:" <language> ":" <rules>
 
@@ -96,7 +97,7 @@ bytes (beginning with `1`) after command encode parameter number. For example,
     <parameter> ::= ( 1xxxxxxx )*
 
 There are 127 different commands number in one command byte, but language may
-have less commands. A mutation can generate any bytes and Evolu must try to
+have less commands. A mutation can generate any bytes and Evolu Lang must try to
 decode any of them. So, commands are marked numbers in a circle: if language
 have 3 commands (`separator`, `a`, `b`), 0 will be encode `separator`, 1 – `a`,
 2 – `b`, but 3 will encode `separator` again, 4 – `a`, etc.
@@ -114,7 +115,7 @@ If a rule doesn’t have any conditions it will run once at start as constructor
 
 ### Standard Commands Pack
 
-You can create your own language with Evolu, but for common tasks Evolu has
+You can create your own language with Evolu Lang, but for common tasks it has
 the standard commands pack to create Turing completeness languages.
 
 Conditions:

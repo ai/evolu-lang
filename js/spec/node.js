@@ -1,8 +1,8 @@
-// Run Evolu.js tests in Node.js
+// Run JavaScript tests for Evolu Lang in Node.js
 
 require.paths.unshift('spec', 'lib')
 require('jspec')
-require('evolu')
+require('evolu-lang')
 
 JSpec.
   exec('spec/tests/language.js').

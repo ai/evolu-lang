@@ -2,8 +2,8 @@
 <html>
   <head>
     <meta charset='UTF-8' />
-    <title>Darwin.js specs</title>
-    <script type="text/javascript" src="../lib/evolu.js"></script>
+    <title>Evolu Lang for JS specs</title>
+    <script type="text/javascript" src="../lib/evolu-lang.js"></script>
     <script type="text/javascript" src="./jspec.js"></script>
     
     <script type="text/javascript" src="./tests/language.js"></script>
@@ -14,7 +14,7 @@
     <script>
       JSpec.include({
         reporters: {
-          Darwin: function(results) {
+          Evolu: function(results) {
             if (results.stats.failures)
               document.body.className = 'has-failures'
             var set = {
@@ -88,12 +88,6 @@
             font: italic 300% Georgia, serif;
             margin-bottom: 0.4em;
             }
-            h1 span {
-              color: #358c23;
-              }
-              .has-failures h1 span {
-                color: #8c3523;
-                }
           
           .header .summary {
             clear: both;
@@ -191,7 +185,7 @@
       <div class="header">
         <div class="jspec">JSpec <span id="jspec-version"></span></div>
         <h1>
-          Evolu.<span>js</span> specs
+          Evolu Lang for JS
         </h1>
         <div class="summary">
           <h2 id="result"></h2>
@@ -213,7 +207,7 @@
       </ul>
     </div>
     <script type="text/javascript">
-      JSpec.run({ reporter: JSpec.reporters.Darwin }).report()
+      JSpec.run({ reporter: JSpec.reporters.Evolu }).report()
     </script>
   </body>
 </html>

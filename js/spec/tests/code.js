@@ -1,7 +1,7 @@
-JSpec.describe('evolu.Code', function() {
+JSpec.describe('evolu.lang.Code', function() {
     it('should return original program bytes', function() {
-        evolu.lang('LNG', function() { })
-        var code = evolu.compile('EVOLU:LNG:abc')
+        evolu.lang.add('LNG', function() { })
+        var code = evolu.lang.compile('EVOLU:LNG:abc')
         expect(code.bytes).to(eql, [97, 98, 99])
         expect(code.toSource()).to(eql, 'EVOLU:LNG:abc')
         
@@ -10,10 +10,10 @@ JSpec.describe('evolu.Code', function() {
     })
     
     it('should add new rule by DSL', function() {
-        var lang = evolu.lang('LNG', function() {
+        var lang = evolu.lang.add('LNG', function() {
             this.condition('a').command('b', { params: ['one', 'two'] })
         })
-        var code = new evolu.Code(lang)
+        var code = new evolu.lang.Code(lang)
         code.rule('a', ['a', 0], ['b', 'two'])
         
         expect(code.rules).to(eql, [{
@@ -21,9 +21,9 @@ JSpec.describe('evolu.Code', function() {
                     { command: lang.commands.a, param: 0 },
                     { command: lang.commands.b, param: 'two' }],
             code: code,
-            on: evolu.Rule.prototype.on,
-            off: evolu.Rule.prototype.off,
-            run: evolu.Rule.prototype.run,
+            on: evolu.lang.Rule.prototype.on,
+            off: evolu.lang.Rule.prototype.off,
+            run: evolu.lang.Rule.prototype.run,
             required: 2,
             id: 0
         }])
@@ -33,11 +33,11 @@ JSpec.describe('evolu.Code', function() {
     
     it('should init command', function() {
         var result = ''
-        var code = new evolu.Code(evolu.lang('LNG', function() {
+        var code = new evolu.lang.Code(evolu.lang.add('LNG', function() {
             this.command('a', {
                 init: function(param) {
                     result += 'a'
-                    expect(this).to(be_an_instance_of, evolu.Code)
+                    expect(this).to(be_an_instance_of, evolu.lang.Code)
                     expect(this.currentRule.lines.length).to(be, 2)
                     expect(this.currentLine.command.name).to(be, 'a')
                     expect(param).to(be, 'one')
@@ -49,7 +49,7 @@ JSpec.describe('evolu.Code', function() {
     })
     
     it('should init condition', function() {
-        var code = new evolu.Code(evolu.lang('LNG', function() {
+        var code = new evolu.lang.Code(evolu.lang.add('LNG', function() {
             this.condition('a', function() { this.inited = 1 })
         }))
         
@@ -64,7 +64,7 @@ JSpec.describe('evolu.Code', function() {
     })
     
     it('should have condition index', function() {
-        var code = new evolu.Code(evolu.lang('LNG', function() {
+        var code = new evolu.lang.Code(evolu.lang.add('LNG', function() {
             this.condition('a').condition('b')
         }))
         code.rule(['a'], ['b', 1])
@@ -77,7 +77,7 @@ JSpec.describe('evolu.Code', function() {
     })
     
     it('should enable/disable rule', function() {
-        var code = new evolu.Code(evolu.lang('LNG', function() {
+        var code = new evolu.lang.Code(evolu.lang.add('LNG', function() {
             this.condition('if_a').condition('if_b')
         }))
         var rule = code.rule('if_a', 'if_b')
@@ -114,7 +114,7 @@ JSpec.describe('evolu.Code', function() {
     })
     
     it('should enable/disable rules by condition', function() {
-        var code = new evolu.Code(evolu.lang('LNG', function() {
+        var code = new evolu.lang.Code(evolu.lang.add('LNG', function() {
             this.condition('if_a').condition('if_b')
         }))
         var rule0 = code.rule(['if_a'])
@@ -138,7 +138,7 @@ JSpec.describe('evolu.Code', function() {
     
     it('should run rules', function() {
         var currentCode, currentRule, currentLine, result = ''
-        var code = new evolu.Code(evolu.lang('LNG', function() {
+        var code = new evolu.lang.Code(evolu.lang.add('LNG', function() {
             this.condition('if_a').
                  condition('if_b').
                  command('one', function() {
@@ -166,7 +166,7 @@ JSpec.describe('evolu.Code', function() {
     
     it('should change running list after run', function() {
         var result = ''
-        var code = new evolu.Code(evolu.lang('LNG', function() {
+        var code = new evolu.lang.Code(evolu.lang.add('LNG', function() {
             this.condition('if_a').
                  condition('if_b').
                  command('one', function() {
@@ -190,7 +190,7 @@ JSpec.describe('evolu.Code', function() {
     
     it('should initialize code', function() {
         var result = ''
-        var code = new evolu.Code(evolu.lang('LNG', function() {
+        var code = new evolu.lang.Code(evolu.lang.add('LNG', function() {
             this.condition('if_a').
                  command('one', function() { result += '1' }).
                  command('two', function() { result += '2' })
@@ -208,7 +208,7 @@ JSpec.describe('evolu.Code', function() {
     })
     
     it('should allow to listen events', function() {
-        var code = new evolu.Code(evolu.lang('LNG', function() { }))
+        var code = new evolu.lang.Code(evolu.lang.add('LNG', function() { }))
         var runned = ''
         
         code.listen('a', function(one, two) {

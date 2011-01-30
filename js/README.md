@@ -1,7 +1,8 @@
-# Evolu.js
+# Evolu Lang for JS
 
-Evolu.js is a JavaScript implementation of virtual machine to execute programs
-in Evolu programming language.
+Evolu Lang is a programming language to automatically generate programs by
+evolution (genetic programming) and  has a JavaScript implementation of virtual
+machine to execute this generated programs.
 
 ## How To
 
@@ -11,19 +12,19 @@ tick count it received.
 
 ### Language
 
-Like XML, Evolu is just a syntax format. So you need to define a language for
-your task using the `evolu.lang(name, initializer)` function. It receives
-a language name (to use it as a prefix in the source code for storing and
-transferring the program) and function (which adds the language commands to
-`this`), and returns a new language.
+Like XML, Evolu Lang is just a syntax format. So you need to define a language
+for your task using the `evolu.lang.add(name, initializer)` function.
+It receives a language name (to use it as a prefix in the source code for
+storing and transferring the program) and function (which adds the language
+commands to `this`), and returns a new language.
 
 For the common cases you can use the standard commands pack, and you only need
 to define the input/output signals.
 
-    var lang = evolu.lang('EVEN-ODD', function() {
-        this.add(evolu.standard.input('tick', 'result'))
-        this.add(evolu.standard.output('even', 'odd'))
-        lang.add(evolu.standard.variables)
+    var lang = evolu.lang.add('EVEN-ODD', function() {
+        this.add(evolu.lang.standard.input('tick', 'result'))
+        this.add(evolu.lang.standard.output('even', 'odd'))
+        lang.add(evolu.lang.standard.variables)
     })
 
 ### Population
@@ -91,12 +92,12 @@ to a server:
 Source is a string with `EVOLU:` and a language name in prefix. For example,
 `"EVOLU:EVEN-ODD:\x04\x80\x00\x01\x80\x03\x80\x05…"`.
 
-Use `evolu.compile(string)` to automatically find a language (using the source
+Use `evolu.lang.compile(string)` to automatically find a language (using the source
 prefix) and compile the bytes into a program:
 
-    bestProgram == evolu.compile(bestProgram.toSource())
+    bestProgram == evolu.lang.compile(bestProgram.toSource())
 
 ## License
 
-Evolu.js is licensed under the GNU Lesser General Public License version 3.
+Evolu Lang for JS is licensed under the GNU Lesser General Public License version 3.
 See the LICENSE file or http://www.gnu.org/licenses/lgpl.html.
