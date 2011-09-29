@@ -1,5 +1,7 @@
 # Evolu
 
+*Project is moved to <https://github.com/evolu/evolu-lang>.*
+
 Evolu is a programming language to automatically generate programs by evolution
 (genetic programming). Generator (genetic algorithm, particle swarm optimization
 or other) will use Evolu to compile bytes with random mutations (gene) to
