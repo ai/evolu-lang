@@ -1,10 +1,10 @@
-JSpec.describe('evolu', function() {
+describe('evolu.lang', function() {
     
     it('should calculate odd or even signals was be received', function() {
-        evolu.lang('ODD-EVEN', function() {
-            this.add(evolu.standard.input('tick', 'result'))
-            this.add(evolu.standard.output('odd', 'even'))
-            this.add(evolu.standard.variables)
+        evolu.lang.add('ODD-EVEN', function() {
+            this.add(evolu.lang.standard.input('tick', 'result'))
+            this.add(evolu.lang.standard.output('odd', 'even'))
+            this.add(evolu.lang.standard.variables)
         })
         
         // rule 0:
@@ -28,7 +28,7 @@ JSpec.describe('evolu', function() {
         //   ? if_var_more_0 1
         //     send_signal   odd
         
-        var code = evolu.compile('EVOLU:ODD-EVEN:' +
+        var code = evolu.lang.compile('EVOLU:ODD-EVEN:' +
                                  '\x04\x80\x00' +
                                  '\x01\x80\x03\x80\x05\x80\x04\x81\x00' +
                                  '\x01\x80\x03\x81\x05\x81\x04\x80\x00' +
@@ -42,13 +42,13 @@ JSpec.describe('evolu', function() {
         
         code.init()
         code.signal('result')
-        expect(result).to(be, 'even ')
+        expect(result).toEqual('even ')
         
         code.signal('tick').signal('tick').signal('tick').signal('result')
-        expect(result).to(be, 'even odd ')
+        expect(result).toEqual('even odd ')
         
         code.signal('tick').signal('result')
-        expect(result).to(be, 'even odd even ')
+        expect(result).toEqual('even odd even ')
     })
     
 })

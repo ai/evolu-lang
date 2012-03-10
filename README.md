@@ -1,11 +1,9 @@
-# Evolu
+# Evolu Lang
 
-*Project is moved to <https://github.com/ai/evolu-lang>.*
-
-Evolu is a programming language to automatically generate programs by evolution
-(genetic programming). Generator (genetic algorithm, particle swarm optimization
-or other) will use Evolu to compile bytes with random mutations (gene) to
-program, run and test it.
+Evolu Lang is a programming language to automatically generate programs by
+evolution (genetic programming). Generator (genetic algorithm, particle swarm
+optimization or other) will use Evolu Lang to compile bytes with random
+mutations (gene) to program, run and test it.
 
 It is created to be readable by human beings (instead of
 artificial neural networks) and easily editable and mixable for genetic
@@ -13,8 +11,8 @@ algorithm (instead of tree structure and modern production languages).
 
 ## How It Works
 
-A developer defines commands by Evolu to create a business specific language
-(or uses the standard commands pack) and defines tests (*fitness*),
+A developer defines commands by Evolu Lang to create a business specific
+language (or uses the standard commands pack) and defines tests (*fitness*),
 to determine what program he or she wants to create.
 
 In the next step he or she uses a generator, which uses a genetic algorithm,
@@ -22,7 +20,7 @@ particle swarm optimization or other evolutionary algorithms.
 In the simplest case:
 1. Generator creates an array (*population*) with random bytes (*genes*).
 2. It adds random changes (*mutation*) to each byte stream in this array.
-3. It compiles each of these random byte streams by Evolu language and runs
+3. It compiles each of these random byte streams by Evolu Lang and runs
    obtained programs with tests.
 4. Bad programs will be deleted and best programs will be copied to the
    population.
@@ -64,9 +62,10 @@ In the simplest case:
 Each Evolu program starts with an `EVOLU:` prefix to check, that the file or
 stream contains a program.
 
-Like XML, Evolu is just a syntax format. So you need to have business-specific
-languages and mark, what language is used in this Evolu program. So, after
-the `EVOLU:` prefix, stream must contain language name and a colon.
+Like XML, Evolu Lang is just a syntax format. So you need to have
+business-specific languages and mark, what language is used in this Evolu
+program. So, after the `EVOLU:` prefix, stream must contain language name and a
+colon.
 
     <program> ::= "EVOLU:" <language> ":" <rules>
 
@@ -98,7 +97,7 @@ bytes (beginning with `1`) after command encode parameter number. For example,
     <parameter> ::= ( 1xxxxxxx )*
 
 There are 127 different commands number in one command byte, but language may
-have less commands. A mutation can generate any bytes and Evolu must try to
+have less commands. A mutation can generate any bytes and Evolu Lang must try to
 decode any of them. So, commands are marked numbers in a circle: if language
 have 3 commands (`separator`, `a`, `b`), 0 will be encode `separator`, 1 – `a`,
 2 – `b`, but 3 will encode `separator` again, 4 – `a`, etc.
@@ -116,7 +115,7 @@ If a rule doesn’t have any conditions it will run once at start as constructor
 
 ### Standard Commands Pack
 
-You can create your own language with Evolu, but for common tasks Evolu has
+You can create your own language with Evolu Lang, but for common tasks it has
 the standard commands pack to create Turing completeness languages.
 
 Conditions:
@@ -136,3 +135,118 @@ Commands:
 
 The developer must define, what input and output signals will be in the
 language, but variables can be added dynamically by mutation.
+
+## How To
+
+For example, we will generate program (by genetic programming), which calculates
+`tick` signals and on `result` signal it sends whether an `even` or an `odd`
+tick count it received.
+
+### Language
+
+Like XML, Evolu Lang is just a syntax format. So you need to define a language
+for your task using the `evolu.lang.add(name, initializer)` function.
+It receives a language name (to use it as a prefix in the source code for
+storing and transferring the program) and function (which adds the language
+commands to `this`), and returns a new language.
+
+For the common cases you can use the standard commands pack, and you only need
+to define the input/output signals.
+
+    var lang = evolu.lang.add('EVEN-ODD', function() {
+        this.add(evolu.lang.standard.input('tick', 'result'))
+        this.add(evolu.lang.standard.output('even', 'odd'))
+        lang.add(evolu.lang.standard.variables)
+    })
+
+### Population
+
+Get any genetic algorithm library or write it by yourself. Use a byte array
+(array of integers from `0` to `255`, for example `[0, 255, 13, 68, 145]`) as
+genes.
+
+    var population = []
+    // Add 100 genes to the first population
+    for (var i = 0; i < 100; i++) {
+        var gene = []
+        // Each gene will have random length
+        while (Math.random < 0.9) {
+            // Add a random byte to the current gene
+            gene.push(Math.round(255 * Math.random()))
+        }
+    }
+
+### Mutation
+
+*Note that the integers in an array must be from `0` to `255`.*
+
+In the genetic algorithm you can use any types of mutation for a byte stream
+(a lot of libraries contain them). You can add, change, delete and
+move bytes in the array.
+
+You can use crossover to mix arrays or just move a part of bytes from one array
+to another (like horizontal gene transfer).
+
+### Selection
+
+To calculate fitness for each gene in the population, you need to compile
+each byte array:
+
+    var program = lang.compile(population[i])
+
+Send the data to the program and check its output data to calculate fitness.
+It’s like automatic unit testing, but your test must return a score,
+not just a pass/fail result.
+
+If you use the standard commands pack, you can use the `receive_signal` event
+to listen output signals and the `signal` function to send input signals:
+
+    output = []
+    program.listen('receive_signal', function(signal) {
+        output.push(signal)
+    })
+    
+    program.signal('tick').signal('tick').signal('result')
+    // Some hypothetical API
+    check(output).to_contain('even')
+    
+    output = []
+    program.signal('tick').signal('result')
+    check(output).to_contain('odd')
+
+### Saving
+
+When you generate a program for your demands, you can save it to a disk or send
+to a server:
+
+    var source = bestProgram.toSource()
+
+Source is a string with `EVOLU:` and a language name in prefix. For example,
+`"EVOLU:EVEN-ODD:\x04\x80\x00\x01\x80\x03\x80\x05…"`.
+
+Use `evolu.lang.compile(string)` to automatically find a language (using the source
+prefix) and compile the bytes into a program:
+
+    bestProgram == evolu.lang.compile(bestProgram.toSource())
+
+## Testing
+
+1. Install Rake (Ruby make) and RubyGems (Ruby package manager).
+   For example, on Ubuntu:
+   
+       sudo apt-get install rake rubygems
+
+2. Install `jasmin` gem:
+
+       gem install jasmin
+
+3. Run test server:
+
+       rake jamsin
+
+4. Open <http://localhost:8888>.
+
+## License
+
+Evolu Lang is licensed under the GNU Lesser General Public License version 3.
+See the LICENSE file or http://www.gnu.org/licenses/lgpl.html.
